@@ -1,6 +1,6 @@
 # CitySense
 Software Engineering
 
-cd frontend
+cd citysense
 npm install
 
