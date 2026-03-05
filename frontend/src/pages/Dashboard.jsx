@@ -70,9 +70,9 @@ function Dashboard() {
             ) : (
               <button
                 className="visit-btn"
-                onClick={() => window.open("/test3.html", "_blank")}
+                onClick={() => markVisited(zone._id)}
               >
-                Open Map
+                Mark as Visited
               </button>
             )}
           </div>
