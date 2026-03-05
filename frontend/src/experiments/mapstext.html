@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bengaluru Urban Chapters</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4GMxs7IKOv7CTOzGTI60Mg0s2np1zeTA"></script>
+  <script>
+    function initMap() {
+      const mgRoad = { lat: 12.9758, lng: 77.6055 };
+
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 14,
+        center: mgRoad,
+      });
+
+      new google.maps.Marker({
+        position: mgRoad,
+        map: map,
+        title: "MG Road",
+      });
+    }
+  </script>
+</head>
+<body onload="initMap()">
+  <div id="map" style="height:500px;width:100%;"></div>
+</body>
+</html>
