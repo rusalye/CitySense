@@ -1,0 +1,150 @@
+.dashboard-container {
+  padding: 40px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #d9e8ff 100%);
+  min-height: calc(100vh - 60px);
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  gap: 20px;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.dashboard-header h1 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 2rem;
+}
+
+.progress-text {
+  margin: 0;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.logout-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+.dashboard-subtitle {
+  color: #666;
+  margin-bottom: 32px;
+  font-size: 1.1rem;
+}
+
+.locations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.location-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.location-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.location-name {
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.location-card.visited {
+  border-left: 4px solid #4CAF50;
+  background: linear-gradient(135deg, #f9f9f9 0%, #f0f8f0 100%);
+}
+
+.location-card .badge {
+  background: #4CAF50;
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.visit-btn {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.visit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 20px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .logout-btn {
+    width: 100%;
+  }
+
+  .locations-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+}
