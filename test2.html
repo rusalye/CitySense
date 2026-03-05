@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CitySense — Feel the City</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════════
+   THEME TOKENS
+══════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg:#0b0d0f; --bg2:#111418; --bg3:#171c22;
+  --card:#13181f; --card2:#1c2330;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+  --text:#f2ede4; --text2:#a09880; --text3:#5a6070;
+  --shadow:rgba(0,0,0,0.6);
+  --topbar-bg:rgba(11,13,15,0.95); --panel-bg:#111418;
+  --map-vignette:radial-gradient(ellipse at center,transparent 40%,rgba(11,13,15,0.7) 100%);
+  --mode-calm-bg:rgba(120,195,150,0.08); --mode-comfort-bg:rgba(220,170,90,0.08); --mode-explore-bg:rgba(180,120,220,0.08);
+}
+[data-theme="light"] {
+  --bg:#f5f0e8; --bg2:#ede7db; --bg3:#e4ddd0;
+  --card:#faf7f2; --card2:#f0ebe0;
+  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
+  --text:#1a1612; --text2:#6b5f4a; --text3:#a8967e;
+  --shadow:rgba(0,0,0,0.12);
+  --topbar-bg:rgba(245,240,232,0.97); --panel-bg:#ede7db;
+  --map-vignette:radial-gradient(ellipse at center,transparent 40%,rgba(245,240,232,0.6) 100%);
+  --mode-calm-bg:rgba(80,160,110,0.10); --mode-comfort-bg:rgba(190,140,60,0.10); --mode-explore-bg:rgba(150,90,200,0.10);
+}
+:root {
+  --gold:#d4a84b; --gold2:#f0c96e;
+  --teal:#5eb88a; --teal2:#7fd4a6;
+  --plum:#9b6bbf; --plum2:#be96e0;
+  --sky:#5b9fd4; --coral:#d4735b; --rose:#d45b8a;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:14px;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .4s,color .4s;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.6;}
+
+/* ── SHELL ── */
+.shell{display:grid;grid-template-columns:68px 1fr;grid-template-rows:58px 1fr;height:100vh;width:100vw;}
+
+/* ══════════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════════ */
+.topbar{grid-column:1/-1;background:var(--topbar-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px 0 0;z-index:50;}
+.topbar-logo{width:68px;height:58px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-right:1px solid var(--border);}
+.logo-emblem{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--gold),var(--teal));display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(212,168,75,.25);}
+.logo-emblem span{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#fff;}
+.topbar-brand{padding:0 20px;border-right:1px solid var(--border);height:100%;display:flex;flex-direction:column;justify-content:center;flex-shrink:0;}
+.brand-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text);letter-spacing:.02em;line-height:1;}
+.brand-name em{font-style:italic;color:var(--gold);}
+.brand-sub{font-size:9.5px;font-family:'Courier Prime',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.14em;margin-top:3px;}
+.dest-ticker{display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid var(--border);height:100%;min-width:200px;}
+.dest-city{font-size:13px;font-weight:500;color:var(--text);}
+.dest-country{font-size:10px;color:var(--text3);font-family:'Courier Prime',monospace;letter-spacing:.08em;text-transform:uppercase;}
+.topbar-search{flex:1;padding:0 20px;max-width:440px;}
+.search-inner{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:28px;padding:8px 16px;transition:box-shadow .25s,border-color .25s;}
+.search-inner:focus-within{border-color:rgba(212,168,75,.4);box-shadow:0 0 0 3px rgba(212,168,75,.08);}
+.s-icon{color:var(--text3);font-size:15px;flex-shrink:0;}
+.search-input{background:transparent;border:none;outline:none;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;flex:1;min-width:0;}
+.search-input::placeholder{color:var(--text3);}
+.s-kbd{font-family:'Courier Prime',monospace;font-size:10px;color:var(--text3);background:var(--card);border:1px solid var(--border);border-radius:5px;padding:2px 6px;flex-shrink:0;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;padding-left:20px;}
+.weather-chip{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);border-radius:22px;padding:6px 14px;cursor:pointer;transition:border-color .2s;}
+.weather-chip:hover{border-color:var(--border2);}
+.w-temp{font-size:13px;font-weight:600;color:var(--gold);}
+.w-desc{font-size:11px;color:var(--text2);}
+.page-title-chip{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:22px;padding:6px 16px;font-size:12px;font-family:'Courier Prime',monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);}
+.theme-toggle{width:56px;height:28px;background:var(--bg3);border:1px solid var(--border2);border-radius:14px;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0;}
+.theme-toggle::before{content:attr(data-icon);position:absolute;top:50%;left:4px;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:11px;transition:left .3s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 6px rgba(0,0,0,.3);}
+[data-theme="light"] .theme-toggle::before{left:calc(100% - 24px);}
+.icon-btn{width:34px;height:34px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;position:relative;}
+.icon-btn:hover{color:var(--text);border-color:var(--border2);}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--gold);border-radius:50%;border:1.5px solid var(--bg);}
+.avatar-btn{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--plum));border:2px solid var(--border2);color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .2s,box-shadow .2s;}
+.avatar-btn:hover{border-color:var(--gold);box-shadow:0 0 12px rgba(212,168,75,.2);}
+
+/* ══════════════════════════════════════════
+   SIDENAV
+══════════════════════════════════════════ */
+.sidenav{background:var(--panel-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:4px;z-index:40;}
+.snav-btn{width:44px;height:44px;border-radius:12px;background:transparent;border:none;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .2s;position:relative;}
+.snav-btn:hover{background:var(--bg3);color:var(--text2);}
+.snav-btn.active{background:var(--bg3);color:var(--text);}
+.snav-btn.active::after{content:'';position:absolute;right:-1px;width:3px;height:22px;background:var(--gold);border-radius:3px 0 0 3px;}
+.snav-sep{width:28px;height:1px;background:var(--border);margin:4px 0;}
+.snav-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:4px;}
+/* tooltip */
+.snav-btn .tip{position:absolute;left:54px;background:var(--card);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;font-family:'Outfit',sans-serif;z-index:100;box-shadow:0 4px 16px var(--shadow);}
+.snav-btn:hover .tip{opacity:1;}
+
+/* ══════════════════════════════════════════
+   MAIN CONTENT AREA
+══════════════════════════════════════════ */
+.content-area{display:grid;grid-template-columns:360px 1fr;overflow:hidden;position:relative;}
+
+/* pages hide/show */
+.page{display:none;grid-column:1/-1;grid-template-columns:360px 1fr;height:calc(100vh - 58px);}
+.page.active{display:grid;}
+/* pages with only right panel (no sidebar content) */
+.page.full-right{grid-template-columns:1fr;}
+.page.full-right .right-panel{grid-column:1;}
+
+/* ══════════════════════════════════════════
+   LEFT PANEL (shared base)
+══════════════════════════════════════════ */
+.left-panel{background:var(--panel-bg);border-right:1px solid var(--border);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:0;scrollbar-width:thin;scrollbar-color:var(--bg3) transparent;}
+.left-panel::-webkit-scrollbar{width:3px;}
+.left-panel::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px;}
+
+/* ─── SHARED COMPONENTS ─── */
+.sec-divider{display:flex;align-items:center;gap:10px;padding:16px 20px 10px;}
+.sec-label{font-family:'Courier Prime',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);flex-shrink:0;}
+.sec-line{flex:1;height:1px;background:var(--border);}
+.sec-icon{font-size:11px;color:var(--text3);}
+
+/* GREETING BLOCK */
+.greeting-block{padding:24px 20px 20px;border-bottom:1px solid var(--border);}
+.greeting-time-line{font-family:'Courier Prime',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--text3);margin-bottom:8px;}
+.greeting-name{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:600;line-height:1.18;color:var(--text);margin-bottom:10px;}
+.greeting-name em{font-style:italic;color:var(--gold);}
+.greeting-name .wave{display:inline-block;animation:wave 2.2s ease-in-out infinite;transform-origin:70% 70%;font-style:normal;}
+@keyframes wave{0%,100%{transform:rotate(0)}20%{transform:rotate(20deg)}40%{transform:rotate(-8deg)}60%{transform:rotate(14deg)}80%{transform:rotate(-4deg)}}
+.greeting-sub{font-size:13px;color:var(--text2);line-height:1.6;transition:opacity .4s;}
+.gs-hi{color:var(--text);font-weight:500;}
+
+/* PROFILE MINI */
+.profile-mini{margin:8px 16px 0;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .22s;}
+.profile-mini:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 16px var(--shadow);}
+.pm-avatar{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--sky),var(--plum));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0;}
+.pm-info{flex:1;min-width:0;}
+.pm-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.pm-xp-row{display:flex;align-items:center;gap:6px;}
+.pm-xp-label{font-size:10px;color:var(--text3);font-family:'Courier Prime',monospace;flex-shrink:0;}
+.pm-xp-track{flex:1;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;max-width:70px;}
+.pm-xp-fill{height:100%;width:68%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:2px;}
+.pm-xp-pct{font-size:10px;color:var(--text3);font-family:'Courier Prime',monospace;}
+.pm-arrow{color:var(--text3);font-size:13px;flex-shrink:0;transition:transform .2s;}
+.profile-mini:hover .pm-arrow{transform:translateX(3px);color:var(--gold);}
+
+/* ACTIVE MODE BANNER */
+.active-banner{margin:8px 16px 0;border-radius:12px;padding:9px 13px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;gap:9px;font-size:12px;transition:all .3s;}
+.ab-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ab-text{flex:1;color:var(--text2);}
+.ab-text strong{color:var(--text);font-weight:500;}
+.ab-badge{font-size:9px;font-family:'Courier Prime',monospace;padding:2px 7px;border-radius:6px;background:rgba(94,184,138,.12);color:var(--teal);text-transform:uppercase;letter-spacing:.08em;}
+
+/* MODE CARDS */
+.modes-wrap{padding:0 16px 4px;display:flex;flex-direction:column;gap:8px;}
+.mode-card{border-radius:14px;border:1.5px solid var(--border);padding:13px 15px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:13px;position:relative;overflow:hidden;background:var(--card);}
+.mode-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;pointer-events:none;}
+.mode-card.calm::before{background:linear-gradient(135deg,var(--mode-calm-bg),transparent 60%);}
+.mode-card.comfort::before{background:linear-gradient(135deg,var(--mode-comfort-bg),transparent 60%);}
+.mode-card.explore::before{background:linear-gradient(135deg,var(--mode-explore-bg),transparent 60%);}
+.mode-card:hover::before,.mode-card.active::before{opacity:1;}
+.mode-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 20px var(--shadow);}
+.mode-card.active{border-color:var(--border2);}
+.mode-ico-wrap{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:transform .2s;}
+.mode-card:hover .mode-ico-wrap{transform:scale(1.1) rotate(-4deg);}
+.mode-card.calm .mode-ico-wrap{background:rgba(94,184,138,.14);}
+.mode-card.comfort .mode-ico-wrap{background:rgba(212,168,75,.14);}
+.mode-card.explore .mode-ico-wrap{background:rgba(155,107,191,.14);}
+.mode-body{flex:1;}
+.mode-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.mode-card.calm .mode-title{color:var(--teal);}
+.mode-card.comfort .mode-title{color:var(--gold);}
+.mode-card.explore .mode-title{color:var(--plum2);}
+.mode-desc{font-size:11px;color:var(--text2);line-height:1.45;}
+.mode-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;transition:all .2s;position:relative;}
+.mode-card.active .mode-radio::after{content:'';position:absolute;inset:2px;border-radius:50%;}
+.mode-card.calm.active .mode-radio{border-color:var(--teal);}
+.mode-card.calm.active .mode-radio::after{background:var(--teal);}
+.mode-card.comfort.active .mode-radio{border-color:var(--gold);}
+.mode-card.comfort.active .mode-radio::after{background:var(--gold);}
+.mode-card.explore.active .mode-radio{border-color:var(--plum2);}
+.mode-card.explore.active .mode-radio::after{background:var(--plum2);}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px 4px;}
+.stat-tile{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 10px;text-align:center;cursor:pointer;transition:all .2s;}
+.stat-tile:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 4px 14px var(--shadow);}
+.stat-emoji{font-size:18px;margin-bottom:4px;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--text);line-height:1;}
+.stat-num sup{font-size:12px;color:var(--gold);}
+.stat-lbl{font-size:9.5px;font-family:'Courier Prime',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;}
+
+/* PLACES LIST */
+.places-list{padding:0 16px;display:flex;flex-direction:column;}
+.place-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all .2s;}
+.place-row:last-child{border-bottom:none;}
+.place-row:hover{padding-left:5px;}
+.place-thumb{width:42px;height:42px;border-radius:12px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:transform .2s;}
+.place-row:hover .place-thumb{transform:scale(1.05) rotate(-3deg);}
+.place-details{flex:1;min-width:0;}
+.place-name-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.place-nm{font-size:13px;font-weight:500;color:var(--text);}
+.place-hot{font-size:8px;padding:2px 6px;border-radius:5px;background:rgba(212,168,75,.15);color:var(--gold);font-family:'Courier Prime',monospace;text-transform:uppercase;letter-spacing:.08em;}
+.place-meta-row{display:flex;align-items:center;gap:8px;}
+.place-dist{font-size:10.5px;font-family:'Courier Prime',monospace;color:var(--gold);}
+.place-tag{font-size:9.5px;padding:1.5px 6px;border-radius:5px;background:var(--bg3);color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+.place-mode-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.place-rating{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
+.rating-num{font-size:12px;font-family:'Courier Prime',monospace;color:var(--text2);}
+.rating-stars{font-size:9px;color:var(--gold);}
+
+/* STREET CARDS */
+.cards-scroll-wrap{padding:0 16px 20px;}
+.cards-scroll{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+.cards-scroll::-webkit-scrollbar{display:none;}
+.street-card{min-width:110px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 12px 11px;flex-shrink:0;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;}
+.street-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 14px 14px;opacity:0;transition:opacity .2s;}
+.street-card.sc-green::before{background:var(--teal);}
+.street-card.sc-gold::before{background:var(--gold);}
+.street-card.sc-plum::before{background:var(--plum);}
+.street-card.sc-sky::before{background:var(--sky);}
+.street-card.sc-coral::before{background:var(--coral);}
+.street-card:hover{transform:translateY(-4px) rotate(-1deg);box-shadow:0 10px 28px var(--shadow);border-color:var(--border2);}
+.street-card:hover::before{opacity:1;}
+.sc-glyph{font-size:26px;display:block;margin-bottom:8px;}
+.sc-name{font-size:11.5px;font-weight:500;color:var(--text);margin-bottom:3px;line-height:1.3;}
+.sc-type{font-size:9.5px;font-family:'Courier Prime',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;}
+.sc-badge{position:absolute;top:10px;right:10px;font-size:10px;width:18px;height:18px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;}
+.sc-locked{position:absolute;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px;opacity:0;transition:opacity .2s;}
+.street-card:hover .sc-locked{opacity:1;}
+
+/* BADGE (generic) */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-family:'Courier Prime',monospace;padding:3px 9px;border-radius:7px;text-transform:uppercase;letter-spacing:.07em;}
+.badge-teal{background:rgba(94,184,138,.14);color:var(--teal);border:1px solid rgba(94,184,138,.2);}
+.badge-gold{background:rgba(212,168,75,.14);color:var(--gold);border:1px solid rgba(212,168,75,.2);}
+.badge-plum{background:rgba(155,107,191,.14);color:var(--plum2);border:1px solid rgba(155,107,191,.2);}
+.badge-sky{background:rgba(91,159,212,.14);color:var(--sky);border:1px solid rgba(91,159,212,.2);}
+.badge-coral{background:rgba(212,115,91,.14);color:var(--coral);border:1px solid rgba(212,115,91,.2);}
+.badge-rose{background:rgba(212,91,138,.14);color:var(--rose);border:1px solid rgba(212,91,138,.2);}
+
+/* ══════════════════════════════════════════
+   RIGHT PANEL
+══════════════════════════════════════════ */
+.right-panel{position:relative;overflow:hidden;}
+
+/* ──── MAP (right panel) ──── */
+#map{width:100%;height:100%;}
+.map-vignette{position:absolute;inset:0;background:var(--map-vignette);pointer-events:none;z-index:5;}
+.map-ui{position:absolute;inset:0;z-index:10;pointer-events:none;}
+.map-ui>*{pointer-events:all;}
+.map-top{position:absolute;top:16px;left:16px;right:16px;display:flex;align-items:center;gap:10px;}
+.map-mode-chip{display:flex;align-items:center;gap:8px;background:rgba(11,13,15,.88);backdrop-filter:blur(20px);border:1px solid var(--border2);border-radius:22px;padding:8px 16px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:border-color .2s;flex-shrink:0;}
+[data-theme="light"] .map-mode-chip{background:rgba(245,240,232,.92);}
+.mmc-dot{width:8px;height:8px;border-radius:50%;}
+.filter-row{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex:1;}
+.filter-row::-webkit-scrollbar{display:none;}
+.fchip{display:flex;align-items:center;gap:5px;background:rgba(11,13,15,.82);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:20px;padding:7px 13px;font-size:11.5px;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;}
+[data-theme="light"] .fchip{background:rgba(245,240,232,.88);}
+.fchip:hover{color:var(--text);border-color:var(--border2);}
+.fchip.active{color:#0b0d0f;border-color:transparent;font-weight:500;}
+.fchip.active.fc-teal{background:var(--teal);}
+.fchip.active.fc-gold{background:var(--gold);color:#0b0d0f;}
+.fchip.active.fc-plum{background:var(--plum2);}
+.fchip.active.fc-sky{background:var(--sky);}
+.sensory-panel{position:absolute;top:60px;right:16px;background:rgba(11,13,15,.9);backdrop-filter:blur(20px);border:1px solid var(--border2);border-radius:16px;padding:14px 16px;width:192px;}
+[data-theme="light"] .sensory-panel{background:rgba(245,240,232,.94);}
+.sp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sp-title{font-family:'Courier Prime',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);}
+.sp-pulse{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:pulse-live 1.8s infinite;}
+@keyframes pulse-live{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(94,184,138,.5)}50%{opacity:.8;box-shadow:0 0 0 4px rgba(94,184,138,0)}}
+.sp-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.sp-row:last-child{margin-bottom:0;}
+.sp-icon{font-size:13px;width:18px;text-align:center;flex-shrink:0;}
+.sp-label{font-size:10.5px;color:var(--text2);width:38px;flex-shrink:0;}
+.sp-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.sp-fill{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.sf-green{background:linear-gradient(90deg,var(--teal),var(--teal2));}
+.sf-yellow{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.sf-red{background:linear-gradient(90deg,#c04040,#e06060);}
+.sf-blue{background:linear-gradient(90deg,var(--sky),#8ac4f0);}
+.sp-val{font-size:10px;font-family:'Courier Prime',monospace;color:var(--text3);width:22px;text-align:right;flex-shrink:0;}
+.map-controls{position:absolute;top:50%;right:16px;transform:translateY(-50%);display:flex;flex-direction:column;gap:7px;}
+.mctrl{width:38px;height:38px;background:rgba(11,13,15,.88);backdrop-filter:blur(16px);border:1px solid var(--border2);border-radius:11px;color:var(--text2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Outfit',sans-serif;}
+[data-theme="light"] .mctrl{background:rgba(245,240,232,.92);}
+.mctrl:hover{color:var(--text);border-color:var(--gold);box-shadow:0 0 12px rgba(212,168,75,.15);}
+.map-bottom{position:absolute;bottom:16px;left:16px;right:16px;display:flex;align-items:flex-end;gap:12px;}
+.map-legend{background:rgba(11,13,15,.88);backdrop-filter:blur(16px);border:1px solid var(--border2);border-radius:14px;padding:12px 14px;flex-shrink:0;}
+[data-theme="light"] .map-legend{background:rgba(245,240,232,.92);}
+.ml-title{font-family:'Courier Prime',monospace;font-size:8.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);margin-bottom:8px;}
+.ml-row{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2);margin-bottom:5px;}
+.ml-row:last-child{margin-bottom:0;}
+.ml-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ml-line{width:20px;height:3px;border-radius:2px;flex-shrink:0;}
+.chapter-card{background:rgba(11,13,15,.9);backdrop-filter:blur(20px);border:1px solid var(--border2);border-radius:18px;padding:14px 16px;flex-shrink:0;}
+[data-theme="light"] .chapter-card{background:rgba(245,240,232,.94);}
+.cc-label{font-family:'Courier Prime',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);margin-bottom:8px;}
+.cc-chapter{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.cc-chapter em{font-style:italic;color:var(--gold);}
+.cc-progress{display:flex;align-items:center;gap:8px;}
+.cc-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.cc-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:2px;width:40%;}
+.cc-pct{font-size:10px;font-family:'Courier Prime',monospace;color:var(--gold);}
+.place-card{flex:1;background:rgba(11,13,15,.92);backdrop-filter:blur(24px);border:1px solid var(--border2);border-radius:18px;padding:16px 18px;display:none;animation:slideUp .3s cubic-bezier(.4,0,.2,1);}
+[data-theme="light"] .place-card{background:rgba(245,240,232,.96);}
+.place-card.show{display:block;}
+@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.pc-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+.pc-icon{width:50px;height:50px;border-radius:14px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.pc-title{font-size:16px;font-weight:600;color:var(--text);font-family:'Cormorant Garamond',serif;margin-bottom:3px;}
+.pc-sub{font-size:11px;color:var(--text2);}
+.pc-close{margin-left:auto;width:24px;height:24px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s;flex-shrink:0;}
+.pc-close:hover{color:var(--text);border-color:var(--border2);}
+.pc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.pc-tag{font-size:10.5px;padding:3px 9px;border-radius:7px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.pc-tag.hi{background:rgba(212,168,75,.12);color:var(--gold);border-color:rgba(212,168,75,.2);}
+.pc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.pcs{background:var(--bg3);border-radius:10px;padding:8px 6px;text-align:center;}
+.pcs-val{font-size:15px;font-family:'Cormorant Garamond',serif;font-weight:600;color:var(--text);}
+.pcs-lbl{font-size:9px;font-family:'Courier Prime',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;}
+.pc-btn{width:100%;background:linear-gradient(135deg,var(--gold),#c8912a);border:none;border-radius:11px;padding:11px;color:#0b0d0f;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.03em;transition:opacity .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.pc-btn:hover{opacity:.9;transform:scale(.99);}
+
+/* ══════════════════════════════════════════
+   PAGE: EXPLORE
+══════════════════════════════════════════ */
+.explore-right{padding:28px;overflow-y:auto;background:var(--bg);}
+.explore-hero{border-radius:20px;background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid var(--border);padding:28px;margin-bottom:24px;position:relative;overflow:hidden;}
+.explore-hero::before{content:'✦ ✦ ✦';position:absolute;right:20px;top:20px;font-size:11px;color:rgba(212,168,75,.2);letter-spacing:10px;}
+.explore-hero h2{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.2;}
+.explore-hero h2 em{font-style:italic;color:var(--gold);}
+.explore-hero p{font-size:13px;color:var(--text2);max-width:500px;line-height:1.6;}
+.explore-hero-meta{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.discovery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:28px;}
+.discovery-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);}
+.discovery-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px var(--shadow);border-color:var(--border2);}
+.dc-thumb{height:120px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;}
+.dc-thumb.calm-bg{background:linear-gradient(135deg,rgba(94,184,138,.15),rgba(94,184,138,.05));}
+.dc-thumb.comfort-bg{background:linear-gradient(135deg,rgba(212,168,75,.15),rgba(212,168,75,.05));}
+.dc-thumb.explore-bg{background:linear-gradient(135deg,rgba(155,107,191,.15),rgba(155,107,191,.05));}
+.dc-thumb.sky-bg{background:linear-gradient(135deg,rgba(91,159,212,.15),rgba(91,159,212,.05));}
+.dc-body{padding:14px;}
+.dc-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.dc-sub{font-size:11.5px;color:var(--text2);line-height:1.5;margin-bottom:10px;}
+.dc-meta{display:flex;align-items:center;justify-content:space-between;}
+.dc-dist{font-size:10.5px;font-family:'Courier Prime',monospace;color:var(--gold);}
+.dc-rating{font-size:10.5px;font-family:'Courier Prime',monospace;color:var(--text3);}
+.section-h{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:16px;}
+.section-h em{font-style:italic;color:var(--gold);}
+
+/* ══════════════════════════════════════════
+   PAGE: JOURNAL
+══════════════════════════════════════════ */
+.journal-right{padding:28px;overflow-y:auto;background:var(--bg);}
+.journal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.add-btn{display:flex;align-items:center;gap:7px;background:var(--gold);border:none;border-radius:12px;padding:10px 18px;color:#0b0d0f;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s;}
+.add-btn:hover{opacity:.88;}
+.journal-timeline{display:flex;flex-direction:column;gap:16px;}
+.journal-entry{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 20px;cursor:pointer;transition:all .22s;position:relative;}
+.journal-entry:hover{border-color:var(--border2);box-shadow:0 4px 20px var(--shadow);transform:translateY(-2px);}
+.je-date{font-family:'Courier Prime',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.je-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.2;}
+.je-title em{font-style:italic;color:var(--gold);}
+.je-body{font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:12px;}
+.je-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.je-stats{display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--border);margin-top:4px;}
+.je-stat{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);font-family:'Courier Prime',monospace;}
+.je-mood{position:absolute;top:16px;right:16px;font-size:22px;}
+
+/* ══════════════════════════════════════════
+   PAGE: CHALLENGES
+══════════════════════════════════════════ */
+.challenges-right{padding:28px;overflow-y:auto;background:var(--bg);}
+.challenges-hero{border-radius:20px;background:linear-gradient(135deg,rgba(212,168,75,.12),rgba(94,184,138,.08));border:1px solid rgba(212,168,75,.2);padding:24px;margin-bottom:24px;display:flex;align-items:center;gap:20px;}
+.ch-trophy{font-size:48px;flex-shrink:0;}
+.ch-hero-text h2{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--text);line-height:1.2;margin-bottom:6px;}
+.ch-hero-text h2 em{font-style:italic;color:var(--gold);}
+.ch-hero-text p{font-size:13px;color:var(--text2);}
+.ch-streak{margin-top:10px;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);}
+.ch-streak strong{color:var(--gold);}
+.challenges-tabs{display:flex;gap:8px;margin-bottom:20px;}
+.ctab{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:8px 16px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .2s;font-family:'Courier Prime',monospace;text-transform:uppercase;letter-spacing:.08em;}
+.ctab.active{background:var(--gold);color:#0b0d0f;border-color:transparent;}
+.ctab:hover:not(.active){border-color:var(--border2);color:var(--text);}
+.challenges-grid{display:flex;flex-direction:column;gap:12px;}
+.challenge-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;cursor:pointer;transition:all .22s;}
+.challenge-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 6px 20px var(--shadow);}
+.challenge-card.completed{opacity:.7;}
+.cc-top{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px;}
+.cc-icon-wrap{width:46px;height:46px;border-radius:13px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.cc-info{flex:1;}
+.cc-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.cc-desc{font-size:11.5px;color:var(--text2);line-height:1.5;}
+.cc-reward{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Courier Prime',monospace;color:var(--gold);margin-top:5px;}
+.cc-progress-wrap{display:flex;align-items:center;gap:10px;}
+.cc-prog-track{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.cc-prog-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.cc-prog-lbl{font-size:10px;font-family:'Courier Prime',monospace;color:var(--text3);flex-shrink:0;white-space:nowrap;}
+.cc-complete-check{font-size:20px;flex-shrink:0;}
+
+/* ══════════════════════════════════════════
+   PAGE: CARDS COLLECTION
+══════════════════════════════════════════ */
+.cards-right{padding:28px;overflow-y:auto;background:var(--bg);}
+.cards-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.cards-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
+.big-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 16px 14px;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden;}
+.big-card:hover{transform:translateY(-5px) rotate(-1deg);box-shadow:0 14px 36px var(--shadow);border-color:var(--border2);}
+.big-card.locked{opacity:.55;filter:grayscale(.5);}
+.big-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;border-radius:0 0 18px 18px;}
+.big-card.rarity-common::after{background:var(--text3);}
+.big-card.rarity-rare::after{background:var(--teal);}
+.big-card.rarity-epic::after{background:var(--plum);}
+.big-card.rarity-legendary::after{background:linear-gradient(90deg,var(--gold),var(--coral),var(--plum));}
+.bc-emoji{font-size:36px;display:block;margin-bottom:10px;}
+.bc-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;line-height:1.3;}
+.bc-set{font-size:10px;font-family:'Courier Prime',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;}
+.bc-rarity{font-size:9.5px;font-family:'Courier Prime',monospace;text-transform:uppercase;letter-spacing:.08em;}
+.bc-lock{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;opacity:0;transition:opacity .2s;}
+.big-card.locked:hover .bc-lock{opacity:1;}
+
+/* ══════════════════════════════════════════
+   PAGE: CHAPTERS / CITY MAP
+══════════════════════════════════════════ */
+.chapters-right{padding:28px;overflow-y:auto;background:var(--bg);}
+.chapters-hero{border-radius:20px;background:linear-gradient(135deg,rgba(91,159,212,.12),rgba(155,107,191,.08));border:1px solid rgba(91,159,212,.2);padding:24px;margin-bottom:24px;}
+.ch-chapters-list{display:flex;flex-direction:column;gap:14px;}
+.chapter-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;cursor:pointer;transition:all .22s;display:flex;align-items:center;gap:16px;}
+.chapter-item:hover{border-color:var(--border2);transform:translateX(4px);box-shadow:0 4px 20px var(--shadow);}
+.chapter-item.locked-ch{opacity:.6;}
+.ci-num{width:44px;height:44px;border-radius:12px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--text3);flex-shrink:0;}
+.chapter-item.active-ch .ci-num{background:rgba(212,168,75,.15);color:var(--gold);border-color:rgba(212,168,75,.3);}
+.ci-info{flex:1;}
+.ci-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.ci-title em{font-style:italic;color:var(--gold);}
+.ci-desc{font-size:11.5px;color:var(--text2);line-height:1.5;margin-bottom:8px;}
+.ci-progress{display:flex;align-items:center;gap:8px;}
+.ci-track{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.ci-fill{height:100%;border-radius:2px;}
+.ci-pct{font-size:10px;font-family:'Courier Prime',monospace;color:var(--text3);}
+.ci-arrow{font-size:16px;color:var(--text3);transition:color .2s;}
+.chapter-item:hover .ci-arrow{color:var(--gold);}
+
+/* ══════════════════════════════════════════
+   PAGE: SETTINGS / PROFILE
+══════════════════════════════════════════ */
+.settings-right{padding:28px;overflow-y:auto;background:var(--bg);}
+.settings-sections{display:flex;flex-direction:column;gap:20px;}
+.settings-group{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.sg-header{padding:14px 18px 10px;border-bottom:1px solid var(--border);}
+.sg-title{font-family:'Courier Prime',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);}
+.setting-row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;}
+.setting-row:last-child{border-bottom:none;}
+.setting-row:hover{background:var(--bg3);}
+.sr-icon{width:34px;height:34px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sr-info{flex:1;}
+.sr-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.sr-sub{font-size:11px;color:var(--text2);}
+.sr-value{font-size:11px;font-family:'Courier Prime',monospace;color:var(--text3);}
+/* toggle switch */
+.toggle-sw{width:40px;height:22px;border-radius:11px;background:var(--bg3);border:1px solid var(--border2);cursor:pointer;position:relative;transition:background .25s;flex-shrink:0;}
+.toggle-sw.on{background:var(--teal);}
+.toggle-sw::before{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .25s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.toggle-sw.on::before{left:21px;}
+
+/* profile card big */
+.profile-big{background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:20px;display:flex;align-items:center;gap:18px;}
+.pb-avatar{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--sky),var(--plum));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 4px 20px rgba(91,159,212,.3);border:2px solid rgba(255,255,255,.12);}
+.pb-info{flex:1;}
+.pb-name{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--text);}
+.pb-name em{font-style:italic;color:var(--gold);}
+.pb-rank{font-size:11px;font-family:'Courier Prime',monospace;color:var(--text3);margin-bottom:10px;}
+.pb-xp-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.pb-xp-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;max-width:200px;}
+.pb-xp-fill{height:100%;width:68%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:3px;position:relative;overflow:hidden;}
+.pb-xp-fill::after{content:'';position:absolute;top:0;right:0;bottom:0;width:20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4));animation:shimmer 2s infinite;}
+@keyframes shimmer{0%,100%{opacity:0}50%{opacity:1}}
+.pb-xp-pct{font-size:11px;font-family:'Courier Prime',monospace;color:var(--gold);}
+.pb-xp-lbl{font-size:10px;font-family:'Courier Prime',monospace;color:var(--text3);}
+.pb-stats-row{display:flex;gap:20px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.pb-stat{text-align:center;}
+.pb-stat-val{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--text);}
+.pb-stat-lbl{font-size:9.5px;font-family:'Courier Prime',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-top:2px;}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(17,20,26,.96);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:12px 22px;font-size:13px;color:#f2ede4;opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:9997;pointer-events:none;white-space:nowrap;display:flex;align-items:center;gap:8px;}
+[data-theme="light"] #toast{background:rgba(26,22,18,.92);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.anim-in>*{animation:fadeSlideIn .45s cubic-bezier(.4,0,.2,1) both;}
+.anim-in>*:nth-child(1){animation-delay:.03s}.anim-in>*:nth-child(2){animation-delay:.07s}
+.anim-in>*:nth-child(3){animation-delay:.11s}.anim-in>*:nth-child(4){animation-delay:.15s}
+.anim-in>*:nth-child(5){animation-delay:.19s}.anim-in>*:nth-child(6){animation-delay:.23s}
+.anim-in>*:nth-child(7){animation-delay:.27s}.anim-in>*:nth-child(8){animation-delay:.31s}
+.anim-in>*:nth-child(9){animation-delay:.35s}.anim-in>*:nth-child(10){animation-delay:.39s}
+
+/* page transition */
+.page{animation:fadeSlideIn .35s cubic-bezier(.4,0,.2,1);}
+
+/* scrollable right panels */
+.explore-right,.journal-right,.challenges-right,.cards-right,.chapters-right,.settings-right{height:calc(100vh - 58px);scrollbar-width:thin;scrollbar-color:var(--bg3) transparent;}
+.explore-right::-webkit-scrollbar,.journal-right::-webkit-scrollbar,.challenges-right::-webkit-scrollbar,
+.cards-right::-webkit-scrollbar,.chapters-right::-webkit-scrollbar,.settings-right::-webkit-scrollbar{width:3px;}
+.explore-right::-webkit-scrollbar-thumb,.journal-right::-webkit-scrollbar-thumb,.challenges-right::-webkit-scrollbar-thumb,
+.cards-right::-webkit-scrollbar-thumb,.chapters-right::-webkit-scrollbar-thumb,.settings-right::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══════════ TOPBAR ══════════ -->
+<header class="topbar">
+  <div class="topbar-logo"><div class="logo-emblem"><span>C</span></div></div>
+  <div class="topbar-brand">
+    <div class="brand-name">City<em>Sense</em></div>
+    <div class="brand-sub" id="page-sub">Map View</div>
+  </div>
+  <div class="dest-ticker">
+    <span>📍</span>
+    <div><div class="dest-city">Bengaluru</div><div class="dest-country">India · Karnataka</div></div>
+  </div>
+  <div class="topbar-search">
+    <div class="search-inner">
+      <span class="s-icon">⌕</span>
+      <input class="search-input" type="text" placeholder="Search places, experiences, streets…"/>
+      <span class="s-kbd">⌘K</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="weather-chip"><span>🌤</span><span class="w-temp">24°</span><span class="w-desc">Partly cloudy</span></div>
+    <div class="theme-toggle" data-icon="🌙" onclick="toggleTheme(this)"></div>
+    <div class="icon-btn" onclick="showToast('🔔','1 new challenge unlocked!')">🔔<span class="notif-dot"></span></div>
+    <div class="avatar-btn" onclick="navTo('settings')">S</div>
+  </div>
+</header>
+
+<!-- ══════════ SIDENAV ══════════ -->
+<nav class="sidenav">
+  <button class="snav-btn active" data-page="map"        onclick="navTo('map')">🗺<span class="tip">Map</span></button>
+  <button class="snav-btn"        data-page="explore"    onclick="navTo('explore')">✦<span class="tip">Explore</span></button>
+  <button class="snav-btn"        data-page="journal"    onclick="navTo('journal')">📖<span class="tip">Journal</span></button>
+  <button class="snav-btn"        data-page="challenges" onclick="navTo('challenges')">🏆<span class="tip">Challenges</span></button>
+  <div class="snav-sep"></div>
+  <button class="snav-btn"        data-page="cards"      onclick="navTo('cards')">🃏<span class="tip">Street Cards</span></button>
+  <button class="snav-btn"        data-page="chapters"   onclick="navTo('chapters')">🌍<span class="tip">City Chapters</span></button>
+  <div class="snav-bottom">
+    <button class="snav-btn"      data-page="settings"   onclick="navTo('settings')">⚙<span class="tip">Settings</span></button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     CONTENT AREA — all pages live here
+══════════════════════════════════════════ -->
+<div class="content-area">
+
+<!-- ▓▓▓▓▓ PAGE: MAP ▓▓▓▓▓ -->
+<div class="page active" id="page-map">
+
+  <!-- LEFT PANEL: MAP -->
+  <aside class="left-panel anim-in">
+
+    <!-- GREETING -->
+    <div class="greeting-block">
+      <div class="greeting-time-line" id="live-time">Thursday, 04:18 PM</div>
+      <div class="greeting-name" id="greeting-headline">Good afternoon,<br><em>Swetha Pai</em> <span class="wave">👋</span></div>
+      <div class="greeting-sub" id="greeting-status">The city is <span class="gs-hi">calm right now</span>. <span class="gs-hi">3 new discoveries</span> await in your chapter.</div>
+    </div>
+
+    <!-- PROFILE MINI -->
+    <div class="profile-mini" onclick="navTo('settings')">
+      <div class="pm-avatar">S</div>
+      <div class="pm-info">
+        <div class="pm-name">Swetha Pai</div>
+        <div class="pm-xp-row">
+          <span class="pm-xp-label">Lv 7 · Wanderer</span>
+          <div class="pm-xp-track"><div class="pm-xp-fill"></div></div>
+          <span class="pm-xp-pct">68%</span>
+        </div>
+      </div>
+      <span class="pm-arrow">›</span>
+    </div>
+
+    <!-- ACTIVE MODE BANNER -->
+    <div class="active-banner" id="active-banner">
+      <div class="ab-dot" style="background:var(--teal)"></div>
+      <div class="ab-text"><strong id="ab-mode-name">Calm Mode</strong> · <span id="ab-mode-sub">Low noise, green routes</span></div>
+      <div class="ab-badge" id="ab-badge">Active</div>
+    </div>
+
+    <!-- EXPERIENCE MODES -->
+    <div class="sec-divider"><span class="sec-icon">⊹</span><span class="sec-label">Experience Mode</span><div class="sec-line"></div></div>
+    <div class="modes-wrap">
+      <div class="mode-card calm active" onclick="setMode(this,'calm','🌿','Calm Mode','Low noise, green routes',getVar('--teal'))">
+        <div class="mode-ico-wrap">🌿</div>
+        <div class="mode-body"><div class="mode-title">Calm</div><div class="mode-desc">Quiet routes, parks & green pockets</div></div>
+        <div class="mode-radio"></div>
+      </div>
+      <div class="mode-card comfort" onclick="setMode(this,'comfort','☕','Comfort Mode','Cafés & rest spots',getVar('--gold'))">
+        <div class="mode-ico-wrap">☕</div>
+        <div class="mode-body"><div class="mode-title">Comfort</div><div class="mode-desc">Cozy cafés, rest stops, familiar paths</div></div>
+        <div class="mode-radio"></div>
+      </div>
+      <div class="mode-card explore" onclick="setMode(this,'explore','🔭','Explore Mode','Discover the unknown',getVar('--plum2'))">
+        <div class="mode-ico-wrap">🔭</div>
+        <div class="mode-body"><div class="mode-title">Explore</div><div class="mode-desc">Hidden gems, art lanes & chapters</div></div>
+        <div class="mode-radio"></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="sec-divider"><span class="sec-icon">◈</span><span class="sec-label">Today's Journey</span><div class="sec-line"></div></div>
+    <div class="stats-grid">
+      <div class="stat-tile" onclick="showToast('👟','12,480 steps today!')"><div class="stat-emoji">👟</div><div class="stat-num" id="stat-steps">12<sup>k</sup></div><div class="stat-lbl">Steps</div></div>
+      <div class="stat-tile" onclick="showToast('📍','7 places visited!')"><div class="stat-emoji">📍</div><div class="stat-num" id="stat-places">7</div><div class="stat-lbl">Places</div></div>
+      <div class="stat-tile" onclick="showToast('🃏','3 new cards!')"><div class="stat-emoji">🃏</div><div class="stat-num" id="stat-cards">3</div><div class="stat-lbl">Cards</div></div>
+      <div class="stat-tile" onclick="showToast('🕐','2h 40m out today')"><div class="stat-emoji">🕐</div><div class="stat-num">2.7<sup>h</sup></div><div class="stat-lbl">Out</div></div>
+      <div class="stat-tile" onclick="showToast('🌿','3.2km calm routes')"><div class="stat-emoji">🌿</div><div class="stat-num">3.2<sup>k</sup></div><div class="stat-lbl">Calm km</div></div>
+      <div class="stat-tile" onclick="navTo('chapters')"><div class="stat-emoji">✦</div><div class="stat-num">2</div><div class="stat-lbl">Chapter</div></div>
+    </div>
+
+    <!-- NEARBY -->
+    <div class="sec-divider"><span class="sec-icon">◉</span><span class="sec-label">Nearby</span><div class="sec-line"></div></div>
+    <div class="places-list">
+      <div class="place-row" onclick="openPlace('Cubbon Park','🌳','150m · Open Now','Very Low','4.8','Calm','Urban Park','Green')">
+        <div class="place-thumb">🌳</div>
+        <div class="place-details">
+          <div class="place-name-row"><span class="place-nm">Cubbon Park</span><span class="place-hot">Trending</span></div>
+          <div class="place-meta-row"><span class="place-dist">150m</span><span class="place-tag">Green</span><span class="place-mode-dot" style="background:var(--teal)"></span></div>
+        </div>
+        <div class="place-rating"><span class="rating-num">4.8</span><span class="rating-stars">★★★★★</span></div>
+      </div>
+      <div class="place-row" onclick="openPlace('Matteo Coffee','☕','320m · Open','Low','4.6','Comfort','Specialty Café','Comfort')">
+        <div class="place-thumb">☕</div>
+        <div class="place-details">
+          <div class="place-name-row"><span class="place-nm">Matteo Coffee</span></div>
+          <div class="place-meta-row"><span class="place-dist">320m</span><span class="place-tag">Café</span><span class="place-mode-dot" style="background:var(--gold)"></span></div>
+        </div>
+        <div class="place-rating"><span class="rating-num">4.6</span><span class="rating-stars">★★★★½</span></div>
+      </div>
+      <div class="place-row" onclick="openPlace('Pottery Lane','🎨','0.8km · Afternoon','Medium','4.9','Explore','Cultural','Art')">
+        <div class="place-thumb">🎨</div>
+        <div class="place-details">
+          <div class="place-name-row"><span class="place-nm">Pottery Lane</span><span class="place-hot">Hidden Gem</span></div>
+          <div class="place-meta-row"><span class="place-dist">0.8km</span><span class="place-tag">Art</span><span class="place-mode-dot" style="background:var(--plum2)"></span></div>
+        </div>
+        <div class="place-rating"><span class="rating-num">4.9</span><span class="rating-stars">★★★★★</span></div>
+      </div>
+      <div class="place-row" onclick="openPlace('MG Road Walk','🚶','1.2km · Popular','High','4.5','Explore','Heritage','Walk')">
+        <div class="place-thumb">🚶</div>
+        <div class="place-details">
+          <div class="place-name-row"><span class="place-nm">MG Road Walk</span></div>
+          <div class="place-meta-row"><span class="place-dist">1.2km</span><span class="place-tag">Heritage</span><span class="place-mode-dot" style="background:var(--sky)"></span></div>
+        </div>
+        <div class="place-rating"><span class="rating-num">4.5</span><span class="rating-stars">★★★★½</span></div>
+      </div>
+      <div class="place-row" onclick="openPlace('Ulsoor Lake Walk','🌊','1.8km · Morning','Low','4.7','Calm','Lakeside','Calm')">
+        <div class="place-thumb">🌊</div>
+        <div class="place-details">
+          <div class="place-name-row"><span class="place-nm">Ulsoor Lake</span><span class="place-hot">Sunrise</span></div>
+          <div class="place-meta-row"><span class="place-dist">1.8km</span><span class="place-tag">Lakeside</span><span class="place-mode-dot" style="background:var(--teal)"></span></div>
+        </div>
+        <div class="place-rating"><span class="rating-num">4.7</span><span class="rating-stars">★★★★★</span></div>
+      </div>
+    </div>
+
+    <!-- STREET CARDS -->
+    <div class="sec-divider"><span class="sec-icon">🃏</span><span class="sec-label">Street Cards</span><div class="sec-line"></div></div>
+    <div class="cards-scroll-wrap">
+      <div class="cards-scroll">
+        <div class="street-card sc-green" onclick="navTo('cards')"><div class="sc-badge">✓</div><span class="sc-glyph">🌸</span><div class="sc-name">Blossom Corner</div><div class="sc-type">Green · Rare</div></div>
+        <div class="street-card sc-sky" onclick="navTo('cards')"><div class="sc-badge">✓</div><span class="sc-glyph">🌙</span><div class="sc-name">Night Lantern</div><div class="sc-type">Night · Rare</div></div>
+        <div class="street-card sc-gold" onclick="navTo('cards')"><span class="sc-glyph">🏛</span><div class="sc-name">Heritage Walk</div><div class="sc-type">Cultural · Locked</div><div class="sc-locked">🔒</div></div>
+        <div class="street-card sc-plum" onclick="navTo('cards')"><span class="sc-glyph">🔮</span><div class="sc-name">Hidden Alcove</div><div class="sc-type">Mystery · Epic</div><div class="sc-locked">🔒</div></div>
+        <div class="street-card sc-coral" onclick="navTo('cards')"><span class="sc-glyph">🌅</span><div class="sc-name">Dawn Walker</div><div class="sc-type">Morning · Epic</div><div class="sc-locked">🔒</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAP RIGHT -->
+  <div class="right-panel">
+    <div id="map"></div>
+    <div class="map-vignette"></div>
+    <div class="map-ui">
+      <div class="map-top">
+        <div class="map-mode-chip"><div class="mmc-dot" id="mmc-dot" style="background:var(--teal)"></div><span id="mmc-label">🌿 Calm Mode</span></div>
+        <div class="filter-row">
+          <div class="fchip active fc-teal" onclick="toggleFilter(this)">🌿 Green</div>
+          <div class="fchip active fc-sky"  onclick="toggleFilter(this)">🚶 Walks</div>
+          <div class="fchip active fc-gold" onclick="toggleFilter(this)">🏛 Heritage</div>
+          <div class="fchip" onclick="toggleFilter(this)">☕ Cafés</div>
+          <div class="fchip" onclick="toggleFilter(this)">🎨 Art</div>
+          <div class="fchip" onclick="toggleFilter(this)">📍 Hidden</div>
+          <div class="fchip" onclick="toggleFilter(this)">🌊 Lakeside</div>
+        </div>
+      </div>
+      <div class="sensory-panel">
+        <div class="sp-header"><span class="sp-title">Sensory Awareness</span><div class="sp-pulse"></div></div>
+        <div class="sp-row"><span class="sp-icon">🔊</span><span class="sp-label">Noise</span><div class="sp-track"><div class="sp-fill sf-green" id="sf-noise" style="width:22%"></div></div><span class="sp-val" id="sv-noise">Low</span></div>
+        <div class="sp-row"><span class="sp-icon">👥</span><span class="sp-label">Crowd</span><div class="sp-track"><div class="sp-fill sf-yellow" id="sf-crowd" style="width:38%"></div></div><span class="sp-val" id="sv-crowd">Mid</span></div>
+        <div class="sp-row"><span class="sp-icon">🌬</span><span class="sp-label">Air</span><div class="sp-track"><div class="sp-fill sf-green" id="sf-air" style="width:76%"></div></div><span class="sp-val" id="sv-air">Good</span></div>
+        <div class="sp-row"><span class="sp-icon">✨</span><span class="sp-label">Vibe</span><div class="sp-track"><div class="sp-fill sf-blue" id="sf-vibe" style="width:88%"></div></div><span class="sp-val" id="sv-vibe">High</span></div>
+      </div>
+      <div class="map-controls">
+        <div class="mctrl" onclick="map&&map.setZoom(map.getZoom()+1)">＋</div>
+        <div class="mctrl" onclick="map&&map.setZoom(map.getZoom()-1)">－</div>
+        <div class="mctrl" onclick="locateMe()">◎</div>
+        <div class="mctrl" onclick="showToast('⊞','Map layers')">⊞</div>
+        <div class="mctrl" onclick="showToast('⇝','Route planner')">⇝</div>
+      </div>
+      <div class="map-bottom">
+        <div class="map-legend">
+          <div class="ml-title">Map Key</div>
+          <div class="ml-row"><div class="ml-dot" style="background:var(--teal)"></div>Calm / Green</div>
+          <div class="ml-row"><div class="ml-dot" style="background:var(--gold)"></div>Comfort</div>
+          <div class="ml-row"><div class="ml-dot" style="background:var(--plum2)"></div>Explore</div>
+          <div class="ml-row"><div class="ml-line" style="background:var(--sky)"></div>Walk routes</div>
+        </div>
+        <div class="chapter-card">
+          <div class="cc-label">📖 Current Chapter</div>
+          <div class="cc-chapter">Chapter II — <em>The Green Mile</em></div>
+          <div class="cc-progress"><div class="cc-track"><div class="cc-fill" style="width:40%"></div></div><span class="cc-pct">40%</span></div>
+        </div>
+        <div class="place-card" id="place-card">
+          <div class="pc-top">
+            <div class="pc-icon" id="pc-icon">🌳</div>
+            <div><div class="pc-title" id="pc-title">Cubbon Park</div><div class="pc-sub" id="pc-sub">150m · Open Now</div></div>
+            <div class="pc-close" onclick="document.getElementById('place-card').classList.remove('show')">✕</div>
+          </div>
+          <div class="pc-tags" id="pc-tags"></div>
+          <div class="pc-stats">
+            <div class="pcs"><div class="pcs-val" id="pcs1">Low</div><div class="pcs-lbl">Crowd</div></div>
+            <div class="pcs"><div class="pcs-val" id="pcs2">4.8</div><div class="pcs-lbl">Rating</div></div>
+            <div class="pcs"><div class="pcs-val" id="pcs3">Calm</div><div class="pcs-lbl">Mode Fit</div></div>
+          </div>
+          <button class="pc-btn" onclick="showToast('🗺','Opening navigation...')"><span>✦</span>Take me there</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-map -->
+
+<!-- ▓▓▓▓▓ PAGE: EXPLORE ▓▓▓▓▓ -->
+<div class="page" id="page-explore" style="grid-template-columns:360px 1fr;">
+
+  <aside class="left-panel anim-in">
+    <div class="greeting-block">
+      <div class="greeting-time-line" id="live-time-explore"></div>
+      <div class="greeting-name">Discover<br><em>Bengaluru</em> ✦</div>
+      <div class="greeting-sub">New places, hidden streets & local gems. Updated daily.</div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">◎</span><span class="sec-label">Filter by Mode</span><div class="sec-line"></div></div>
+    <div class="modes-wrap">
+      <div class="mode-card calm active" onclick="filterExplore('calm',this)"><div class="mode-ico-wrap">🌿</div><div class="mode-body"><div class="mode-title">Calm</div><div class="mode-desc">Parks, quiet streets, nature</div></div><div class="mode-radio"></div></div>
+      <div class="mode-card comfort" onclick="filterExplore('comfort',this)"><div class="mode-ico-wrap">☕</div><div class="mode-body"><div class="mode-title">Comfort</div><div class="mode-desc">Cafés, cosy spots, rest stops</div></div><div class="mode-radio"></div></div>
+      <div class="mode-card explore" onclick="filterExplore('explore',this)"><div class="mode-ico-wrap">🔭</div><div class="mode-body"><div class="mode-title">Explore</div><div class="mode-desc">Hidden gems, art, culture</div></div><div class="mode-radio"></div></div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">★</span><span class="sec-label">City Score Today</span><div class="sec-line"></div></div>
+    <div class="stats-grid">
+      <div class="stat-tile"><div class="stat-emoji">🌿</div><div class="stat-num">82<sup>%</sup></div><div class="stat-lbl">Calm</div></div>
+      <div class="stat-tile"><div class="stat-emoji">🌬</div><div class="stat-num">A<sup>+</sup></div><div class="stat-lbl">Air</div></div>
+      <div class="stat-tile"><div class="stat-emoji">🌡</div><div class="stat-num">24<sup>°</sup></div><div class="stat-lbl">Temp</div></div>
+    </div>
+  </aside>
+
+  <div class="right-panel explore-right">
+    <div class="explore-hero">
+      <h2>What's <em>waiting</em> for you today?</h2>
+      <p>Curated urban discoveries based on your Calm mode, time of day, and walking distance from you.</p>
+      <div class="explore-hero-meta">
+        <span class="badge badge-teal">🌿 Calm Day</span>
+        <span class="badge badge-gold">🌤 24° Bengaluru</span>
+        <span class="badge badge-sky">📍 7 places nearby</span>
+      </div>
+    </div>
+    <div class="section-h">Featured <em>Discoveries</em></div>
+    <div class="discovery-grid anim-in" id="discovery-grid">
+      <!-- populated by JS -->
+    </div>
+    <div class="section-h">Popular <em>Right Now</em></div>
+    <div class="discovery-grid anim-in" id="popular-grid"></div>
+  </div>
+</div><!-- /page-explore -->
+
+<!-- ▓▓▓▓▓ PAGE: JOURNAL ▓▓▓▓▓ -->
+<div class="page" id="page-journal" style="grid-template-columns:360px 1fr;">
+  <aside class="left-panel anim-in">
+    <div class="greeting-block">
+      <div class="greeting-time-line" id="live-time-journal"></div>
+      <div class="greeting-name">Your<br><em>City Journal</em> 📖</div>
+      <div class="greeting-sub">Every walk tells a story. <span class="gs-hi">14 entries</span> written so far.</div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">◈</span><span class="sec-label">Journal Stats</span><div class="sec-line"></div></div>
+    <div class="stats-grid">
+      <div class="stat-tile"><div class="stat-emoji">📝</div><div class="stat-num">14</div><div class="stat-lbl">Entries</div></div>
+      <div class="stat-tile"><div class="stat-emoji">🚶</div><div class="stat-num">38<sup>k</sup></div><div class="stat-lbl">Total km</div></div>
+      <div class="stat-tile"><div class="stat-emoji">🗺</div><div class="stat-num">12</div><div class="stat-lbl">Zones</div></div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">🌙</span><span class="sec-label">Best Moods</span><div class="sec-line"></div></div>
+    <div style="padding:0 16px 20px;display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:18px;">😌</span><span style="font-size:12px;color:var(--text2);flex:1;">Peaceful walks</span><span class="badge badge-teal">8 times</span></div>
+      <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:18px;">🤩</span><span style="font-size:12px;color:var(--text2);flex:1;">Excited discoveries</span><span class="badge badge-gold">4 times</span></div>
+      <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:18px;">☕</span><span style="font-size:12px;color:var(--text2);flex:1;">Cozy afternoons</span><span class="badge badge-sky">2 times</span></div>
+    </div>
+  </aside>
+  <div class="right-panel journal-right">
+    <div class="journal-header">
+      <div class="section-h">Walking <em>Stories</em></div>
+      <button class="add-btn" onclick="showToast('📝','New entry started!')">＋ New Entry</button>
+    </div>
+    <div class="journal-timeline anim-in" id="journal-list"></div>
+  </div>
+</div>
+
+<!-- ▓▓▓▓▓ PAGE: CHALLENGES ▓▓▓▓▓ -->
+<div class="page" id="page-challenges" style="grid-template-columns:360px 1fr;">
+  <aside class="left-panel anim-in">
+    <div class="greeting-block">
+      <div class="greeting-time-line" id="live-time-challenges"></div>
+      <div class="greeting-name">City<br><em>Challenges</em> 🏆</div>
+      <div class="greeting-sub"><span class="gs-hi">3 active</span> challenges. You're on a <span class="gs-hi">5-day streak!</span></div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">◈</span><span class="sec-label">Your Progress</span><div class="sec-line"></div></div>
+    <div class="stats-grid">
+      <div class="stat-tile"><div class="stat-emoji">✅</div><div class="stat-num" id="ch-completed">7</div><div class="stat-lbl">Done</div></div>
+      <div class="stat-tile"><div class="stat-emoji">🔥</div><div class="stat-num" id="ch-streak">5</div><div class="stat-lbl">Streak</div></div>
+      <div class="stat-tile"><div class="stat-emoji">⭐</div><div class="stat-num" id="ch-xp">840</div><div class="stat-lbl">XP Earned</div></div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">🏅</span><span class="sec-label">Recent Badges</span><div class="sec-line"></div></div>
+    <div style="padding:0 16px 20px;display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="text-align:center;cursor:pointer;" onclick="showToast('🌿','Green Walker badge earned!')"><div style="font-size:32px;margin-bottom:4px;">🌿</div><div style="font-size:9px;font-family:Courier Prime,monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;">Green<br>Walker</div></div>
+      <div style="text-align:center;cursor:pointer;" onclick="showToast('🌅','Early Bird badge earned!')"><div style="font-size:32px;margin-bottom:4px;">🌅</div><div style="font-size:9px;font-family:Courier Prime,monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;">Early<br>Bird</div></div>
+      <div style="text-align:center;cursor:pointer;" onclick="showToast('☕','Café Hopper badge earned!')"><div style="font-size:32px;margin-bottom:4px;">☕</div><div style="font-size:9px;font-family:Courier Prime,monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;">Café<br>Hopper</div></div>
+      <div style="text-align:center;opacity:.4;cursor:pointer;" onclick="showToast('🔒','Earn 5 more XP to unlock!')"><div style="font-size:32px;margin-bottom:4px;">🔮</div><div style="font-size:9px;font-family:Courier Prime,monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;">Mystery<br>Locked</div></div>
+    </div>
+  </aside>
+  <div class="right-panel challenges-right">
+    <div class="challenges-hero">
+      <div class="ch-trophy">🏆</div>
+      <div class="ch-hero-text">
+        <h2>You're on a <em>roll!</em></h2>
+        <p>Keep exploring to maintain your streak and earn rare street cards.</p>
+        <div class="ch-streak">🔥 <strong>5-day streak</strong> — don't break it today!</div>
+      </div>
+    </div>
+    <div class="challenges-tabs">
+      <div class="ctab active" onclick="filterChallenges('all',this)">All</div>
+      <div class="ctab" onclick="filterChallenges('active',this)">Active</div>
+      <div class="ctab" onclick="filterChallenges('completed',this)">Completed</div>
+      <div class="ctab" onclick="filterChallenges('daily',this)">Daily</div>
+    </div>
+    <div class="challenges-grid anim-in" id="challenges-list"></div>
+  </div>
+</div>
+
+<!-- ▓▓▓▓▓ PAGE: CARDS ▓▓▓▓▓ -->
+<div class="page" id="page-cards" style="grid-template-columns:360px 1fr;">
+  <aside class="left-panel anim-in">
+    <div class="greeting-block">
+      <div class="greeting-time-line" id="live-time-cards"></div>
+      <div class="greeting-name">Street<br><em>Card Collection</em> 🃏</div>
+      <div class="greeting-sub"><span class="gs-hi">5 of 24</span> cards collected. Keep exploring to unlock more!</div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">◈</span><span class="sec-label">Collection Stats</span><div class="sec-line"></div></div>
+    <div class="stats-grid">
+      <div class="stat-tile"><div class="stat-emoji">✅</div><div class="stat-num">5</div><div class="stat-lbl">Collected</div></div>
+      <div class="stat-tile"><div class="stat-emoji">🔒</div><div class="stat-num">19</div><div class="stat-lbl">Locked</div></div>
+      <div class="stat-tile"><div class="stat-emoji">💎</div><div class="stat-num">2</div><div class="stat-lbl">Rare+</div></div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">✦</span><span class="sec-label">Rarity Guide</span><div class="sec-line"></div></div>
+    <div style="padding:0 16px 20px;display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;"><div style="width:14px;height:14px;border-radius:50%;background:var(--text3)"></div><span style="font-size:12px;color:var(--text2);flex:1;">Common</span><span style="font-size:10px;color:var(--text3);font-family:Courier Prime,monospace;">9 cards</span></div>
+      <div style="display:flex;align-items:center;gap:10px;"><div style="width:14px;height:14px;border-radius:50%;background:var(--teal)"></div><span style="font-size:12px;color:var(--text2);flex:1;">Rare</span><span style="font-size:10px;color:var(--text3);font-family:Courier Prime,monospace;">8 cards</span></div>
+      <div style="display:flex;align-items:center;gap:10px;"><div style="width:14px;height:14px;border-radius:50%;background:var(--plum)"></div><span style="font-size:12px;color:var(--text2);flex:1;">Epic</span><span style="font-size:10px;color:var(--text3);font-family:Courier Prime,monospace;">5 cards</span></div>
+      <div style="display:flex;align-items:center;gap:10px;"><div style="width:14px;height:14px;border-radius:50%;background:linear-gradient(90deg,var(--gold),var(--coral))"></div><span style="font-size:12px;color:var(--text2);flex:1;">Legendary</span><span style="font-size:10px;color:var(--text3);font-family:Courier Prime,monospace;">2 cards</span></div>
+    </div>
+  </aside>
+  <div class="right-panel cards-right">
+    <div class="cards-header-row">
+      <div class="section-h">Your <em>Collection</em></div>
+      <span class="badge badge-gold">5 / 24 Collected</span>
+    </div>
+    <div class="cards-filter-row">
+      <div class="ctab active" onclick="filterCards('all',this)">All</div>
+      <div class="ctab" onclick="filterCards('collected',this)">Collected</div>
+      <div class="ctab" onclick="filterCards('locked',this)">Locked</div>
+      <div class="ctab" onclick="filterCards('rare',this)">Rare+</div>
+    </div>
+    <div class="card-grid anim-in" id="card-grid"></div>
+  </div>
+</div>
+
+<!-- ▓▓▓▓▓ PAGE: CHAPTERS ▓▓▓▓▓ -->
+<div class="page" id="page-chapters" style="grid-template-columns:360px 1fr;">
+  <aside class="left-panel anim-in">
+    <div class="greeting-block">
+      <div class="greeting-time-line" id="live-time-chapters"></div>
+      <div class="greeting-name">City<br><em>Chapters</em> 🌍</div>
+      <div class="greeting-sub">Each chapter is a <span class="gs-hi">new urban story</span>. You're on chapter 2 of 6.</div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">◈</span><span class="sec-label">Chapter Progress</span><div class="sec-line"></div></div>
+    <div class="stats-grid">
+      <div class="stat-tile"><div class="stat-emoji">📖</div><div class="stat-num">2</div><div class="stat-lbl">Active</div></div>
+      <div class="stat-tile"><div class="stat-emoji">✅</div><div class="stat-num">1</div><div class="stat-lbl">Complete</div></div>
+      <div class="stat-tile"><div class="stat-emoji">🔒</div><div class="stat-num">4</div><div class="stat-lbl">Locked</div></div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">🗺</span><span class="sec-label">Next Milestone</span><div class="sec-line"></div></div>
+    <div style="padding:0 16px 20px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;">
+        <div style="font-size:20px;margin-bottom:6px;">🎯</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">Visit Pottery Lane</div>
+        <div style="font-size:11.5px;color:var(--text2);line-height:1.5;margin-bottom:10px;">Discover the art street to unlock <em style="color:var(--gold)">Chapter III</em></div>
+        <div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;"><div style="height:100%;width:40%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:2px;"></div></div>
+        <div style="font-size:10px;font-family:Courier Prime,monospace;color:var(--text3);margin-top:4px;">2 / 5 stops completed</div>
+      </div>
+    </div>
+  </aside>
+  <div class="right-panel chapters-right">
+    <div class="chapters-hero">
+      <h2 style="font-family:Cormorant Garamond,serif;font-size:28px;font-weight:600;color:var(--text);margin-bottom:8px;">Bengaluru's <em style="font-style:italic;color:var(--gold)">Urban Story</em></h2>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">Each chapter reveals a new layer of the city — its gardens, streets, culture, and hidden corners. Walk, discover, and unlock the full story.</p>
+    </div>
+    <div class="ch-chapters-list anim-in" id="chapters-list"></div>
+  </div>
+</div>
+
+<!-- ▓▓▓▓▓ PAGE: SETTINGS / PROFILE ▓▓▓▓▓ -->
+<div class="page" id="page-settings" style="grid-template-columns:360px 1fr;">
+  <aside class="left-panel anim-in">
+    <div class="greeting-block">
+      <div class="greeting-time-line" id="live-time-settings"></div>
+      <div class="greeting-name">Hey,<br><em>Swetha</em> ⚙</div>
+      <div class="greeting-sub">Manage your profile, preferences, and city settings.</div>
+    </div>
+    <div class="sec-divider"><span class="sec-icon">◈</span><span class="sec-label">Quick Stats</span><div class="sec-line"></div></div>
+    <div class="stats-grid">
+      <div class="stat-tile"><div class="stat-emoji">🗺</div><div class="stat-num">47</div><div class="stat-lbl">Days Active</div></div>
+      <div class="stat-tile"><div class="stat-emoji">📍</div><div class="stat-num">82</div><div class="stat-lbl">Places</div></div>
+      <div class="stat-tile"><div class="stat-emoji">🃏</div><div class="stat-num">5</div><div class="stat-lbl">Cards</div></div>
+    </div>
+  </aside>
+  <div class="right-panel settings-right">
+    <div class="profile-big">
+      <div class="pb-avatar">S</div>
+      <div class="pb-info">
+        <div class="pb-name"><em>Swetha Pai</em></div>
+        <div class="pb-rank">Lv 7 · Urban Wanderer · Bengaluru, India</div>
+        <div class="pb-xp-row">
+          <div class="pb-xp-track"><div class="pb-xp-fill"></div></div>
+          <span class="pb-xp-pct">68%</span>
+          <span class="pb-xp-lbl">→ Lv 8</span>
+        </div>
+        <div style="font-size:11px;font-family:Courier Prime,monospace;color:var(--text3);">2,840 / 4,200 XP</div>
+        <div class="pb-stats-row">
+          <div class="pb-stat"><div class="pb-stat-val">47</div><div class="pb-stat-lbl">Days</div></div>
+          <div class="pb-stat"><div class="pb-stat-val">82</div><div class="pb-stat-lbl">Places</div></div>
+          <div class="pb-stat"><div class="pb-stat-val">5</div><div class="pb-stat-lbl">Cards</div></div>
+          <div class="pb-stat"><div class="pb-stat-val">7</div><div class="pb-stat-lbl">Challenges</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-sections anim-in">
+      <div class="settings-group">
+        <div class="sg-header"><div class="sg-title">Preferences</div></div>
+        <div class="setting-row" onclick="showToast('🌿','Default mode updated!')">
+          <div class="sr-icon">🌿</div><div class="sr-info"><div class="sr-title">Default Experience Mode</div><div class="sr-sub">Mode applied when you open the app</div></div>
+          <div class="sr-value">Calm</div>
+        </div>
+        <div class="setting-row" onclick="showToast('🔔','Notifications updated!')">
+          <div class="sr-icon">🔔</div><div class="sr-info"><div class="sr-title">Discovery Notifications</div><div class="sr-sub">Alert for new nearby places</div></div>
+          <div class="toggle-sw on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div class="sr-icon">🌙</div><div class="sr-info"><div class="sr-title">Dark Mode</div><div class="sr-sub">Toggle light / dark appearance</div></div>
+          <div class="toggle-sw on" id="dark-mode-toggle" onclick="toggleThemeFromSettings(this)"></div>
+        </div>
+        <div class="setting-row" onclick="showToast('📍','Location updated!')">
+          <div class="sr-icon">📍</div><div class="sr-info"><div class="sr-title">Home City</div><div class="sr-sub">Your base city for exploration</div></div>
+          <div class="sr-value">Bengaluru</div>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="sg-header"><div class="sg-title">Sensory Filters</div></div>
+        <div class="setting-row" onclick="showToast('🔊','Noise filter updated!')">
+          <div class="sr-icon">🔊</div><div class="sr-info"><div class="sr-title">Avoid Noisy Areas</div><div class="sr-sub">Filter out high-noise zones from routes</div></div>
+          <div class="toggle-sw on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row" onclick="showToast('👥','Crowd filter updated!')">
+          <div class="sr-icon">👥</div><div class="sr-info"><div class="sr-title">Avoid Crowded Spots</div><div class="sr-sub">Only show places with low crowd index</div></div>
+          <div class="toggle-sw" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row" onclick="showToast('🌬','Air quality filter updated!')">
+          <div class="sr-icon">🌬</div><div class="sr-info"><div class="sr-title">Air Quality Alerts</div><div class="sr-sub">Warn when AQI exceeds safe levels</div></div>
+          <div class="toggle-sw on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="sg-header"><div class="sg-title">Data & Backend</div></div>
+        <div class="setting-row" onclick="showToast('🔗','API endpoint: /api/v1/user')">
+          <div class="sr-icon">🔗</div><div class="sr-info"><div class="sr-title">API Connection</div><div class="sr-sub">Backend endpoint for live data</div></div>
+          <div class="sr-value" style="color:var(--teal);">Connected</div>
+        </div>
+        <div class="setting-row" onclick="showToast('♻️','Sync triggered!')">
+          <div class="sr-icon">♻️</div><div class="sr-info"><div class="sr-title">Sync Data</div><div class="sr-sub">Manually sync with backend</div></div>
+          <div class="sr-value">Sync now →</div>
+        </div>
+        <div class="setting-row" onclick="showToast('📦','Data exported!')">
+          <div class="sr-icon">📦</div><div class="sr-info"><div class="sr-title">Export My Data</div><div class="sr-sub">Download your journey as JSON</div></div>
+          <div class="sr-value">Export →</div>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="sg-header"><div class="sg-title">Account</div></div>
+        <div class="setting-row" onclick="showToast('✏️','Edit profile!')">
+          <div class="sr-icon">✏️</div><div class="sr-info"><div class="sr-title">Edit Profile</div><div class="sr-sub">Change name, photo, city</div></div>
+        </div>
+        <div class="setting-row" onclick="showToast('🔒','Password reset sent!')">
+          <div class="sr-icon">🔒</div><div class="sr-info"><div class="sr-title">Change Password</div><div class="sr-sub">Update your login credentials</div></div>
+        </div>
+        <div class="setting-row" onclick="showToast('👋','Logged out!')">
+          <div class="sr-icon" style="color:var(--coral);">🚪</div><div class="sr-info"><div class="sr-title" style="color:var(--coral);">Log Out</div><div class="sr-sub">Sign out of CitySense</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content-area -->
+</div><!-- /shell -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════
+   APP STATE — single source of truth
+   (replace with API calls when backend ready)
+═══════════════════════════════════════ */
+const STATE = {
+  user: { name: 'Swetha Pai', initial: 'S', level: 7, xp: 2840, xpNext: 4200, rank: 'Urban Wanderer', streak: 5 },
+  today: { steps: 12480, places: 7, cards: 3, hoursOut: 2.7, calmKm: 3.2, chapter: 2 },
+  mode: 'calm',
+  challenges: { completed: 7, streak: 5, xpEarned: 840 },
+  cards: { collected: 5, total: 24 },
+};
+
+/* ═══════════════════════════════════════
+   DISCOVER / PLACES DATA
+═══════════════════════════════════════ */
+const DISCOVERIES = [
+  { emoji:'🌳', title:'Cubbon Park', sub:'A lush 300-acre park in the heart of the city, perfect for morning walks and picnics.', dist:'150m', rating:'4.8', mode:'calm', bg:'calm-bg', badge:'teal', badgeTxt:'Calm' },
+  { emoji:'☕', title:'Matteo Coffee', sub:'Specialty coffee roastery with cosy corners and quiet reading vibes.', dist:'320m', rating:'4.6', mode:'comfort', bg:'comfort-bg', badge:'gold', badgeTxt:'Comfort' },
+  { emoji:'🎨', title:'Pottery Lane', sub:'A narrow street lined with local artisans, studios and ceramic galleries.', dist:'0.8km', rating:'4.9', mode:'explore', bg:'explore-bg', badge:'plum', badgeTxt:'Explore' },
+  { emoji:'🌊', title:'Ulsoor Lake Walk', sub:'A serene lakeside walking trail perfect for sunrise and sunset strolls.', dist:'1.8km', rating:'4.7', mode:'calm', bg:'calm-bg', badge:'teal', badgeTxt:'Calm' },
+  { emoji:'🏛', title:'Vidhana Soudha', sub:'Iconic heritage architecture — best experienced on foot from the south entrance.', dist:'1.1km', rating:'4.5', mode:'explore', bg:'explore-bg', badge:'plum', badgeTxt:'Heritage' },
+  { emoji:'🌺', title:'Raj Bhavan Gardens', sub:'Quiet botanical gardens open in the mornings — rare urban calm.', dist:'900m', rating:'4.6', mode:'calm', bg:'calm-bg', badge:'teal', badgeTxt:'Hidden' },
+];
+const POPULAR = [
+  { emoji:'🍵', title:"Koshy's Café", sub:"Bengaluru's oldest café — a literary institution since 1940.", dist:'680m', rating:'4.7', mode:'comfort', bg:'comfort-bg', badge:'gold', badgeTxt:'Iconic' },
+  { emoji:'🖼', title:'Venkatappa Art Gallery', sub:'Free contemporary art exhibitions in a serene colonial building.', dist:'500m', rating:'4.4', mode:'explore', bg:'explore-bg', badge:'plum', badgeTxt:'Free' },
+  { emoji:'🚶', title:'Brigade Road Walk', sub:'A vibrant pedestrian street perfect for evening exploration.', dist:'1.4km', rating:'4.3', mode:'explore', bg:'explore-bg', badge:'sky', badgeTxt:'Evening' },
+];
+
+/* ═══════════════════════════════════════
+   CHALLENGES DATA
+═══════════════════════════════════════ */
+const CHALLENGES_DATA = [
+  { id:'c1', icon:'🌿', title:'Morning Green Walk', desc:'Walk through a park before 9 AM three times this week.', reward:'+120 XP · Blossom Card', progress:2, total:3, color:'var(--teal)', type:'active', daily:true },
+  { id:'c2', icon:'☕', title:'Café Connoisseur', desc:'Visit 5 different cafés this month and log your experience.', reward:'+200 XP · Comfort Badge', progress:3, total:5, color:'var(--gold)', type:'active', daily:false },
+  { id:'c3', icon:'🔭', title:'Hidden City Explorer', desc:'Discover 3 hidden locations not on popular maps.', reward:'+300 XP · Hidden Alcove Card', progress:1, total:3, color:'var(--plum2)', type:'active', daily:false },
+  { id:'c4', icon:'📖', title:'Journal 7 Days', desc:'Write a journal entry for 7 consecutive days.', reward:'+150 XP · Storyteller Badge', progress:7, total:7, color:'var(--sky)', type:'completed', daily:false },
+  { id:'c5', icon:'🌅', title:'Sunrise Walker', desc:'Start a walk before 7 AM on 5 different days.', reward:'+250 XP · Dawn Card', progress:5, total:5, color:'var(--gold)', type:'completed', daily:false },
+  { id:'c6', icon:'🏛', title:'Heritage Hunt', desc:'Visit 3 heritage sites and photograph their architecture.', reward:'+180 XP · Heritage Card', progress:0, total:3, color:'var(--coral)', type:'active', daily:true },
+  { id:'c7', icon:'🌊', title:'Waterside Wander', desc:'Walk along any water body — lake, river, or fountain — for 20 minutes.', reward:'+80 XP', progress:0, total:1, color:'var(--sky)', type:'active', daily:true },
+];
+
+/* ═══════════════════════════════════════
+   CARDS DATA
+═══════════════════════════════════════ */
+const CARDS_DATA = [
+  { emoji:'🌸', name:'Blossom Corner', set:'Green Series', rarity:'rare', collected:true },
+  { emoji:'🌙', name:'Night Lantern', set:'Night Series', rarity:'rare', collected:true },
+  { emoji:'🌿', name:'Green Path', set:'Green Series', rarity:'common', collected:true },
+  { emoji:'☕', name:'The Cosy Corner', set:'Comfort Series', rarity:'common', collected:true },
+  { emoji:'🌊', name:'Lake Silence', set:'Water Series', rarity:'rare', collected:true },
+  { emoji:'🏛', name:'Heritage Walk', set:'Heritage Series', rarity:'epic', collected:false },
+  { emoji:'🔮', name:'Hidden Alcove', set:'Mystery Series', rarity:'epic', collected:false },
+  { emoji:'🌅', name:'Dawn Walker', set:'Morning Series', rarity:'epic', collected:false },
+  { emoji:'🎨', name:'Pottery Lane', set:'Art Series', rarity:'rare', collected:false },
+  { emoji:'🌺', name:'Garden Keeper', set:'Green Series', rarity:'common', collected:false },
+  { emoji:'🦋', name:'Butterfly Glade', set:'Nature Series', rarity:'common', collected:false },
+  { emoji:'🌃', name:'City After Dark', set:'Night Series', rarity:'epic', collected:false },
+  { emoji:'🏔', name:'High Ground', set:'Urban Series', rarity:'common', collected:false },
+  { emoji:'🎭', name:'Street Theatre', set:'Culture Series', rarity:'rare', collected:false },
+  { emoji:'🌈', name:'Rain Street', set:'Weather Series', rarity:'rare', collected:false },
+  { emoji:'⭐', name:'Stardust Alley', set:'Night Series', rarity:'legendary', collected:false },
+  { emoji:'🔥', name:'Eternal Flame', set:'Heritage Series', rarity:'legendary', collected:false },
+];
+
+/* ═══════════════════════════════════════
+   CHAPTERS DATA
+═══════════════════════════════════════ */
+const CHAPTERS_DATA = [
+  { num:'I', title:'The First Step', subtitle:'Foundations of the City', desc:'Begin your journey through Bengaluru. Discover the civic heart — parks, squares, and the pulse of public life.', progress:100, color:'var(--teal)', locked:false, active:false },
+  { num:'II', title:'The Green Mile', subtitle:'Urban Nature & Calm Spaces', desc:'Follow the green veins of the city. Hidden gardens, quiet lakes, and urban forests await your footsteps.', progress:40, color:'var(--gold)', locked:false, active:true },
+  { num:'III', title:'Artisan Streets', subtitle:'Culture & Craft', desc:'Pottery lanes, art galleries, and studio streets. A chapter for those who see beauty in the made by hand.', progress:0, color:'var(--plum2)', locked:true, active:false },
+  { num:'IV', title:'The Heritage Trail', subtitle:'History & Architecture', desc:'Colonial buildings, old bazaars, and street corners with century-old stories carved into their stones.', progress:0, color:'var(--coral)', locked:true, active:false },
+  { num:'V', title:'Night City', subtitle:'After Dark Discovery', desc:'The city transforms at night. Lantern-lit streets, quiet lakesides, and cafés glowing past midnight.', progress:0, color:'var(--sky)', locked:true, active:false },
+  { num:'VI', title:'Full Circle', subtitle:'The Complete Wanderer', desc:'Return to where you started — but see it all differently. The city is now part of you.', progress:0, color:'var(--rose)', locked:true, active:false },
+];
+
+/* ═══════════════════════════════════════
+   JOURNAL DATA
+═══════════════════════════════════════ */
+const JOURNAL_DATA = [
+  { date:'Today, Thursday', title:'A Morning in <em>Cubbon Park</em>', body:'Arrived at 7:15 AM when the mist was still low on the lawns. The city hadn\'t woken yet. Just birdsong, a few runners, and the smell of wet earth.', tags:['calm','morning','green'], steps:'4.2k', duration:'1h 10m', mood:'😌', moodColor:'var(--teal)' },
+  { date:'Wednesday, 4 Sep', title:'<em>Pottery Lane</em> Discovery', body:'Took a wrong turn and stumbled on this narrow alley lined with ceramic studios. Spoke to a potter working on a tea set. Stayed an hour. Got a small cup.', tags:['explore','art','discovery'], steps:'6.8k', duration:'2h', mood:'🤩', moodColor:'var(--plum2)' },
+  { date:'Monday, 2 Sep', title:'Matteo Coffee — <em>Afternoon Ritual</em>', body:'Rainy afternoon. Sat by the window with a flat white and watched the street shimmer. Perfect comfort day. Wrote three pages in my notebook.', tags:['comfort','café','rain'], steps:'1.2k', duration:'45m', mood:'☕', moodColor:'var(--gold)' },
+  { date:'Friday, 30 Aug', title:'Ulsoor Lake at <em>Sunset</em>', body:'The water turned amber at 6 PM. A few cyclists, a couple of ducks, and complete silence from the city for about twenty minutes. Rare.', tags:['calm','lakeside','sunset'], steps:'5.1k', duration:'1h 30m', mood:'🌅', moodColor:'var(--sky)' },
+];
+
+/* ═══════════════════════════════════════
+   MAP STYLES
+═══════════════════════════════════════ */
+const MAP_STYLES = {
+  dark:{
+    calm:[{elementType:'geometry',stylers:[{color:'#0c1419'}]},{elementType:'labels.text.fill',stylers:[{color:'#5a7060'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0c1419'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#162030'}]},{featureType:'road.highway',elementType:'geometry',stylers:[{color:'#1e3040'}]},{featureType:'park',elementType:'geometry',stylers:[{color:'#0a1a10'}]},{featureType:'park',elementType:'labels.text.fill',stylers:[{color:'#4a9060'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#071018'}]},{featureType:'poi',elementType:'geometry',stylers:[{color:'#0e1820'}]},{featureType:'transit',elementType:'geometry',stylers:[{color:'#101c28'}]},{featureType:'administrative.locality',elementType:'labels.text.fill',stylers:[{color:'#7ec8a4'}]}],
+    comfort:[{elementType:'geometry',stylers:[{color:'#130e08'}]},{elementType:'labels.text.fill',stylers:[{color:'#705030'}]},{elementType:'labels.text.stroke',stylers:[{color:'#130e08'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#221508'}]},{featureType:'park',elementType:'geometry',stylers:[{color:'#0a1008'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#070a10'}]},{featureType:'administrative.locality',elementType:'labels.text.fill',stylers:[{color:'#d4a84b'}]}],
+    explore:[{elementType:'geometry',stylers:[{color:'#0e0a14'}]},{elementType:'labels.text.fill',stylers:[{color:'#5a4870'}]},{elementType:'labels.text.stroke',stylers:[{color:'#0e0a14'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#1a1228'}]},{featureType:'park',elementType:'geometry',stylers:[{color:'#0c0e10'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#060810'}]},{featureType:'administrative.locality',elementType:'labels.text.fill',stylers:[{color:'#be96e0'}]}],
+  },
+  light:{
+    calm:[{elementType:'geometry',stylers:[{color:'#e8f0e8'}]},{elementType:'labels.text.fill',stylers:[{color:'#3a6040'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#d4e4d4'}]},{featureType:'park',elementType:'geometry',stylers:[{color:'#d0e8d0'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#b4d8e8'}]},{featureType:'administrative.locality',elementType:'labels.text.fill',stylers:[{color:'#1a5030'}]}],
+    comfort:[{elementType:'geometry',stylers:[{color:'#f4ede0'}]},{elementType:'labels.text.fill',stylers:[{color:'#704020'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#e8d8c0'}]},{featureType:'park',elementType:'geometry',stylers:[{color:'#e0eed8'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#b8d8f0'}]},{featureType:'administrative.locality',elementType:'labels.text.fill',stylers:[{color:'#804010'}]}],
+    explore:[{elementType:'geometry',stylers:[{color:'#ede8f4'}]},{elementType:'labels.text.fill',stylers:[{color:'#504070'}]},{featureType:'road',elementType:'geometry',stylers:[{color:'#dcd4ec'}]},{featureType:'park',elementType:'geometry',stylers:[{color:'#d8ecd8'}]},{featureType:'water',elementType:'geometry',stylers:[{color:'#b8ccf0'}]},{featureType:'administrative.locality',elementType:'labels.text.fill',stylers:[{color:'#6030a0'}]}],
+  }
+};
+
+const MAP_PLACES = [
+  {lat:12.9766,lng:77.5993,emoji:'🌳',color:'#5eb88a'},{lat:12.9716,lng:77.5946,emoji:'☕',color:'#d4a84b'},
+  {lat:12.9719,lng:77.6112,emoji:'🎨',color:'#9b6bbf'},{lat:12.9698,lng:77.6060,emoji:'🚶',color:'#5b9fd4'},
+  {lat:12.9748,lng:77.5942,emoji:'🌺',color:'#5eb88a'},{lat:12.9685,lng:77.6196,emoji:'🌊',color:'#5b9fd4'},
+  {lat:12.9672,lng:77.5921,emoji:'🍵',color:'#d4a84b'},{lat:12.9730,lng:77.6080,emoji:'🖼',color:'#9b6bbf'},
+];
+
+/* ═══════════════════════════════════════
+   INIT — render all dynamic content
+═══════════════════════════════════════ */
+function init() {
+  renderDiscoveries();
+  renderJournal();
+  renderChallenges();
+  renderCards();
+  renderChapters();
+  syncStateToUI();
+}
+
+function syncStateToUI() {
+  // Update all stats from STATE
+  const s = STATE.today;
+  setEl('stat-steps', `${(s.steps/1000).toFixed(0)}<sup>k</sup>`);
+  setEl('stat-places', s.places);
+  setEl('stat-cards', s.cards);
+  setEl('ch-completed', STATE.challenges.completed);
+  setEl('ch-streak', STATE.challenges.streak);
+  setEl('ch-xp', STATE.challenges.xpEarned.toLocaleString());
+  // Avatar initials everywhere
+  document.querySelectorAll('.pm-avatar,.pb-avatar,.avatar-btn').forEach(el => el.textContent = STATE.user.initial);
+  document.querySelectorAll('.pm-name').forEach(el => el.textContent = STATE.user.name);
+}
+
+function setEl(id, html) { const el = document.getElementById(id); if(el) el.innerHTML = html; }
+
+/* ═══════════════════════════════════════
+   RENDER FUNCTIONS
+═══════════════════════════════════════ */
+function renderDiscoveries() {
+  const render = (arr, id) => {
+    const c = document.getElementById(id); if(!c) return;
+    c.innerHTML = arr.map(d => `
+      <div class="discovery-card" onclick="showToast('${d.emoji}','${d.title} — navigating!')">
+        <div class="dc-thumb ${d.bg}"><span style="font-size:48px;">${d.emoji}</span></div>
+        <div class="dc-body">
+          <div class="dc-title">${d.title}</div>
+          <div class="dc-sub">${d.sub}</div>
+          <div class="dc-meta">
+            <span class="dc-dist">${d.dist}</span>
+            <span class="badge badge-${d.badge}">${d.badgeTxt}</span>
+            <span class="dc-rating">★ ${d.rating}</span>
+          </div>
+        </div>
+      </div>`).join('');
+  };
+  render(DISCOVERIES, 'discovery-grid');
+  render(POPULAR, 'popular-grid');
+}
+
+function renderJournal() {
+  const c = document.getElementById('journal-list'); if(!c) return;
+  c.innerHTML = JOURNAL_DATA.map(j => `
+    <div class="journal-entry" onclick="showToast('📖','Opening entry...')">
+      <div class="je-date">${j.date}<span class="badge badge-${j.moodColor==='var(--teal)'?'teal':j.moodColor==='var(--gold)'?'gold':'plum'}">${j.tags[0]}</span></div>
+      <div class="je-title">${j.title}</div>
+      <div class="je-body">${j.body}</div>
+      <div class="je-tags">${j.tags.map(t=>`<span class="badge badge-sky">${t}</span>`).join('')}</div>
+      <div class="je-stats">
+        <div class="je-stat">👟 ${j.steps}</div>
+        <div class="je-stat">⏱ ${j.duration}</div>
+        <div class="je-stat">📍 Bengaluru</div>
+      </div>
+      <div class="je-mood">${j.mood}</div>
+    </div>`).join('');
+}
+
+function renderChallenges(filter='all') {
+  const c = document.getElementById('challenges-list'); if(!c) return;
+  const data = filter==='all' ? CHALLENGES_DATA
+    : filter==='active' ? CHALLENGES_DATA.filter(x=>x.type==='active')
+    : filter==='completed' ? CHALLENGES_DATA.filter(x=>x.type==='completed')
+    : CHALLENGES_DATA.filter(x=>x.daily);
+  c.innerHTML = data.map(ch => {
+    const pct = Math.round((ch.progress/ch.total)*100);
+    const done = ch.progress >= ch.total;
+    return `<div class="challenge-card ${done?'completed':''}" onclick="showToast('${ch.icon}','${ch.title}')">
+      <div class="cc-top">
+        <div class="cc-icon-wrap">${ch.icon}</div>
+        <div class="cc-info">
+          <div class="cc-title">${ch.title}</div>
+          <div class="cc-desc">${ch.desc}</div>
+          <div class="cc-reward">🎁 ${ch.reward}</div>
+        </div>
+        ${done ? `<div class="cc-complete-check">✅</div>` : ''}
+      </div>
+      <div class="cc-progress-wrap">
+        <div class="cc-prog-track"><div class="cc-prog-fill" style="width:${pct}%;background:${ch.color};"></div></div>
+        <div class="cc-prog-lbl">${ch.progress} / ${ch.total}${done?' · Done':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderCards(filter='all') {
+  const c = document.getElementById('card-grid'); if(!c) return;
+  let data = CARDS_DATA;
+  if(filter==='collected') data = data.filter(x=>x.collected);
+  else if(filter==='locked') data = data.filter(x=>!x.collected);
+  else if(filter==='rare') data = data.filter(x=>x.rarity==='rare'||x.rarity==='epic'||x.rarity==='legendary');
+  c.innerHTML = data.map(card => `
+    <div class="big-card rarity-${card.rarity} ${card.collected?'':'locked'}" onclick="${card.collected?`showToast('${card.emoji}','${card.name} — collected!')`:`showToast('🔒','Keep exploring to unlock ${card.name}!')`}">
+      <span class="bc-emoji">${card.emoji}</span>
+      <div class="bc-name">${card.name}</div>
+      <div class="bc-set">${card.set}</div>
+      <div class="bc-rarity" style="color:${card.rarity==='legendary'?'var(--gold)':card.rarity==='epic'?'var(--plum2)':card.rarity==='rare'?'var(--teal)':'var(--text3)'}">${card.rarity}</div>
+      ${!card.collected?'<div class="bc-lock">🔒</div>':''}
+    </div>`).join('');
+}
+
+function renderChapters() {
+  const c = document.getElementById('chapters-list'); if(!c) return;
+  c.innerHTML = CHAPTERS_DATA.map(ch => `
+    <div class="chapter-item ${ch.active?'active-ch':''} ${ch.locked?'locked-ch':''}" onclick="${ch.locked?`showToast('🔒','Complete Chapter ${ch.num} first!')`:`showToast('📖','Opening Chapter ${ch.num}...')`}">
+      <div class="ci-num">${ch.num}</div>
+      <div class="ci-info">
+        <div class="ci-title">${ch.title}${ch.active?` — <em>In Progress</em>`:`${ch.progress===100?' — <em>Complete</em>':''}`}</div>
+        <div class="ci-desc">${ch.desc}</div>
+        <div class="ci-progress">
+          <div class="ci-track"><div class="ci-fill" style="width:${ch.progress}%;background:${ch.color};"></div></div>
+          <div class="ci-pct">${ch.locked?'🔒':ch.progress+'%'}</div>
+        </div>
+      </div>
+      <div class="ci-arrow">${ch.locked?'🔒':'›'}</div>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+const PAGE_TITLES = { map:'Map View', explore:'Discover', journal:'Journal', challenges:'Challenges', cards:'Street Cards', chapters:'City Chapters', settings:'Settings' };
+function navTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.snav-btn').forEach(b => b.classList.remove('active'));
+  const p = document.getElementById('page-'+page);
+  if(p) { p.classList.add('active'); p.style.animation='none'; requestAnimationFrame(()=>{p.style.animation='';});}
+  const btn = document.querySelector(`[data-page="${page}"]`);
+  if(btn) btn.classList.add('active');
+  setEl('page-sub', PAGE_TITLES[page] || page);
+  // sync time on each page
+  const t = document.getElementById('live-time-'+page);
+  if(t) t.textContent = getTimeStr();
+  // re-render if needed
+  if(page==='explore') renderDiscoveries();
+  if(page==='challenges') renderChallenges();
+  if(page==='cards') renderCards();
+  if(page==='chapters') renderChapters();
+  if(page==='journal') renderJournal();
+}
+
+/* ═══════════════════════════════════════
+   TIME & GREETING
+═══════════════════════════════════════ */
+const STATUSES = [
+  {s:'calm right now',n:'<span class="gs-hi">3 new discoveries</span> await in your chapter.'},
+  {s:'waking up slowly',n:'Morning air quality is <span class="gs-hi">excellent</span> today.'},
+  {s:'buzzing with energy',n:'Cubbon Park is <span class="gs-hi">quieter than usual</span> right now.'},
+  {s:'perfect for a walk',n:'Weather is <span class="gs-hi">24° and breezy</span> — ideal exploring weather.'},
+  {s:'full of hidden gems',n:'<span class="gs-hi">Pottery Lane</span> unlocked as a new chapter stop.'},
+];
+let statusIdx=0;
+
+function getTimeStr() {
+  const d=new Date(), h=d.getHours(), m=d.getMinutes();
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const hh=h%12||12, ampm=h>=12?'PM':'AM';
+  return `${days[d.getDay()]}, ${String(hh).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
+}
+
+function tick() {
+  const ts = getTimeStr();
+  const h = new Date().getHours();
+  const greet = h<12?'Good morning,':h<17?'Good afternoon,':'Good evening,';
+  setEl('live-time', ts);
+  setEl('greeting-headline', `${greet}<br><em>${STATE.user.name}</em> <span class="wave">👋</span>`);
+  // also sync all page-level time displays
+  ['explore','journal','challenges','cards','chapters','settings'].forEach(pg=>{
+    const el=document.getElementById('live-time-'+pg); if(el) el.textContent=ts;
+  });
+}
+
+function cycleStatus() {
+  statusIdx=(statusIdx+1)%STATUSES.length;
+  const {s,n}=STATUSES[statusIdx];
+  const el=document.getElementById('greeting-status');
+  if(!el) return;
+  el.style.opacity='0';
+  setTimeout(()=>{el.innerHTML=`The city is <span class="gs-hi">${s}</span>. ${n}`;el.style.transition='opacity .5s';el.style.opacity='1';},350);
+}
+
+tick(); setInterval(tick,30000); setInterval(cycleStatus,6000);
+
+/* ═══════════════════════════════════════
+   MODE SWITCH
+═══════════════════════════════════════ */
+let currentMode='calm';
+function getVar(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+function setMode(el,cls,emoji,name,sub,color) {
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('active'));
+  // activate all cards with same class across panels
+  document.querySelectorAll('.mode-card.'+cls).forEach(c=>c.classList.add('active'));
+  currentMode=cls;
+  STATE.mode=cls;
+  const dot=document.getElementById('mmc-dot'); if(dot) dot.style.background=color;
+  const lbl=document.getElementById('mmc-label'); if(lbl) lbl.textContent=`${emoji} ${name}`;
+  const ab=document.getElementById('ab-mode-name'); if(ab) ab.textContent=name;
+  const abs=document.getElementById('ab-mode-sub'); if(abs) abs.textContent=sub;
+  const dot2=document.querySelector('#active-banner .ab-dot'); if(dot2) dot2.style.background=color;
+  if(window.map) applyMapStyle(cls);
+  showToast(emoji, `${name} activated`);
+}
+
+function filterExplore(mode, el) {
+  document.querySelectorAll('#page-explore .mode-card').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const filtered=mode==='all'?DISCOVERIES:DISCOVERIES.filter(d=>d.mode===mode);
+  const c=document.getElementById('discovery-grid'); if(c) {
+    c.innerHTML=''; setTimeout(()=>renderDiscoveries(),100);
+  }
+  showToast('✦',`Showing ${mode} places`);
+}
+
+/* ═══════════════════════════════════════
+   FILTER FUNCTIONS
+═══════════════════════════════════════ */
+function filterChallenges(type,el) {
+  document.querySelectorAll('.challenges-tabs .ctab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderChallenges(type);
+}
+function filterCards(type,el) {
+  document.querySelectorAll('#page-cards .ctab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderCards(type);
+}
+function toggleFilter(el) { el.classList.toggle('active'); }
+
+/* ═══════════════════════════════════════
+   PLACE PREVIEW (MAP)
+═══════════════════════════════════════ */
+function openPlace(name,icon,sub,crowd,rating,mode,tag1,tag2) {
+  setEl('pc-icon',icon); setEl('pc-title',name); setEl('pc-sub',sub);
+  setEl('pcs1',crowd); setEl('pcs2',rating); setEl('pcs3',mode);
+  setEl('pc-tags',`<span class="pc-tag hi">${crowd} Crowd</span><span class="pc-tag">★ ${rating}</span><span class="pc-tag">${mode}</span><span class="pc-tag">${tag1}</span>`);
+  document.getElementById('place-card').classList.add('show');
+}
+
+/* ═══════════════════════════════════════
+   THEME
+═══════════════════════════════════════ */
+function toggleTheme(btn) {
+  const html=document.documentElement;
+  const dark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',dark?'light':'dark');
+  btn.setAttribute('data-icon',dark?'☀️':'🌙');
+  const sw=document.getElementById('dark-mode-toggle'); if(sw) sw.classList.toggle('on',!dark);
+  if(window.map) applyMapStyle(currentMode);
+  showToast(dark?'☀️':'🌙',dark?'Light mode on':'Dark mode on');
+}
+function toggleThemeFromSettings(sw) {
+  const html=document.documentElement;
+  const dark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',dark?'light':'dark');
+  sw.classList.toggle('on',!dark);
+  const topBtn=document.querySelector('.theme-toggle'); if(topBtn) topBtn.setAttribute('data-icon',dark?'☀️':'🌙');
+  if(window.map) applyMapStyle(currentMode);
+}
+
+/* ═══════════════════════════════════════
+   SENSORY LIVE
+═══════════════════════════════════════ */
+const nS=[22,18,28,15,25,20,16],cS=[38,44,35,50,40,30,45],aS=[74,78,82,72,80,86,76],vS=[85,90,88,82,92,87,84];
+let si=0;
+function updateSensory() {
+  si=(si+1)%nS.length;
+  const n=nS[si],c=cS[si],a=aS[si],v=vS[si];
+  const nf=document.getElementById('sf-noise');
+  if(nf){nf.style.width=n+'%';nf.className='sp-fill '+(n<30?'sf-green':n<60?'sf-yellow':'sf-red');}
+  const cf=document.getElementById('sf-crowd'); if(cf) cf.style.width=c+'%';
+  const af=document.getElementById('sf-air'); if(af) af.style.width=a+'%';
+  const vf=document.getElementById('sf-vibe'); if(vf) vf.style.width=v+'%';
+  setEl('sv-noise',n<30?'Low':n<60?'Mid':'High');
+  setEl('sv-crowd',c<30?'Low':c<60?'Mid':'High');
+  setEl('sv-air',a>70?'Good':a>40?'Fair':'Poor');
+  setEl('sv-vibe',v>80?'High':v>50?'Mid':'Low');
+  // Also update Explore city score dynamically
+  const calmEl=document.querySelector('#page-explore .stat-tile:nth-child(1) .stat-num');
+  if(calmEl) calmEl.innerHTML=`${100-c}<sup>%</sup>`;
+}
+setInterval(updateSensory,3500);
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+let toastTimer;
+function showToast(icon,msg){
+  const t=document.getElementById('toast');
+  t.innerHTML=`<span>${icon}</span><span>${msg}</span>`;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ═══════════════════════════════════════
+   GEOLOCATION
+═══════════════════════════════════════ */
+function locateMe(){
+  if(!window.map){showToast('⏳','Map loading…');return;}
+  navigator.geolocation?.getCurrentPosition(pos=>{
+    const ll={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    map.setCenter(ll);map.setZoom(16);
+    new google.maps.Marker({position:ll,map,icon:{path:google.maps.SymbolPath.CIRCLE,scale:10,fillColor:'#5eb88a',fillOpacity:1,strokeColor:'#fff',strokeWeight:2}});
+    showToast('◎','Located you!');
+  },()=>showToast('⚠️','Location unavailable'));
+}
+
+/* ═══════════════════════════════════════
+   GOOGLE MAPS
+═══════════════════════════════════════ */
+let map;
+function applyMapStyle(mode){
+  if(!window.map)return;
+  const theme=document.documentElement.getAttribute('data-theme');
+  map.setOptions({styles:MAP_STYLES[theme][mode]});
+}
+function initMap(){
+  map=new google.maps.Map(document.getElementById('map'),{
+    center:{lat:12.9716,lng:77.5946},zoom:14,
+    styles:MAP_STYLES.dark.calm,
+    disableDefaultUI:true,gestureHandling:'greedy',
+  });
+  MAP_PLACES.forEach((p,i)=>{
+    const m=new google.maps.Marker({
+      position:{lat:p.lat,lng:p.lng},map,
+      icon:{path:'M 0,-16 C -9,-16 -16,-9 -16,0 C -16,9 0,22 0,22 C 0,22 16,9 16,0 C 16,-9 9,-16 0,-16 Z',fillColor:p.color,fillOpacity:.92,strokeColor:'rgba(255,255,255,.25)',strokeWeight:1.5,scale:1,anchor:new google.maps.Point(0,22),labelOrigin:new google.maps.Point(0,0)},
+      label:{text:p.emoji,fontSize:'14px'},
+      animation:google.maps.Animation.DROP,
+    });
+    setTimeout(()=>m.setAnimation(google.maps.Animation.DROP),i*150);
+    m.addListener('click',()=>{
+      openPlace(p.emoji+' Place',p.emoji,'Click to explore','Low','4.7',currentMode.charAt(0).toUpperCase()+currentMode.slice(1),'Featured','CitySense Pick');
+      map.setCenter({lat:p.lat,lng:p.lng});
+    });
+    new google.maps.Circle({center:{lat:p.lat,lng:p.lng},radius:100,map,fillColor:p.color,fillOpacity:.05,strokeColor:p.color,strokeOpacity:.12,strokeWeight:1});
+  });
+}
+
+// INIT
+window.addEventListener('DOMContentLoaded', init);
+</script>
+
+<!-- 🔑 Replace YOUR_API_KEY with your Google Maps JavaScript API key -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4GMxs7IKOv7CTOzGTI60Mg0s2np1zeTA&callback=initMap" async defer></script>
+</body>
+</html>
