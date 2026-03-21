@@ -36,7 +36,7 @@ function AuthPage() {
       console.log('Logging in', { email, password })
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500))
-      navigate('/dashboard', { state: { user: email } })
+      navigate('/app', { state: { user: email } })
     } catch (err) {
       setError('Login failed. Please try again.')
     } finally {
@@ -69,7 +69,7 @@ function AuthPage() {
       console.log('Signing up', { email, password })
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500))
-      navigate('/dashboard', { state: { user: email } })
+      navigate('/app', { state: { user: email } })
     } catch (err) {
       setError('Sign up failed. Please try again.')
     } finally {

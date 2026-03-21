@@ -1,0 +1,101 @@
+import React, { useEffect, useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { CHALLENGES_DATA } from '../data/mockData';
+
+export default function ChallengesPage() {
+  const { showToast } = useApp();
+  const [filterMode, setFilterMode] = useState('all');
+
+  const [timeStr, setTimeStr] = useState('');
+  useEffect(() => {
+    const updateTime = () => {
+      const d = new Date(), h = d.getHours(), m = d.getMinutes();
+      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const hh = h % 12 || 12, ampm = h >= 12 ? 'PM' : 'AM';
+      setTimeStr(`${days[d.getDay()]}, ${String(hh).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const data = filterMode === 'all' ? CHALLENGES_DATA
+    : filterMode === 'active' ? CHALLENGES_DATA.filter(x => x.type === 'active')
+    : filterMode === 'completed' ? CHALLENGES_DATA.filter(x => x.type === 'completed')
+    : CHALLENGES_DATA.filter(x => x.daily);
+
+  return (
+    <div className="page active" id="page-challenges" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>
+      <aside className="left-panel anim-in">
+        <div className="greeting-block">
+          <div className="greeting-time-line">{timeStr}</div>
+          <div className="greeting-name">City<br/><em>Challenges</em> 🏆</div>
+          <div className="greeting-sub"><span className="gs-hi">3 active</span> challenges. You're on a <span className="gs-hi">5-day streak!</span></div>
+        </div>
+        <div className="sec-divider"><span className="sec-icon">◈</span><span className="sec-label">Your Progress</span><div className="sec-line"></div></div>
+        <div className="stats-grid">
+          <div className="stat-tile"><div className="stat-emoji">✅</div><div className="stat-num">7</div><div className="stat-lbl">Done</div></div>
+          <div className="stat-tile"><div className="stat-emoji">🔥</div><div className="stat-num">5</div><div className="stat-lbl">Streak</div></div>
+          <div className="stat-tile"><div className="stat-emoji">⭐</div><div className="stat-num">840</div><div className="stat-lbl">XP Earned</div></div>
+        </div>
+        <div className="sec-divider"><span className="sec-icon">🏅</span><span className="sec-label">Recent Badges</span><div className="sec-line"></div></div>
+        <div style={{padding: '0 16px 20px', display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
+          <div style={{textAlign: 'center', cursor: 'pointer'}} onClick={() => showToast('🌿','Green Walker badge earned!')}>
+            <div style={{fontSize: '32px', marginBottom: '4px'}}>🌿</div><div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em'}}>Green<br/>Walker</div>
+          </div>
+          <div style={{textAlign: 'center', cursor: 'pointer'}} onClick={() => showToast('🌅','Early Bird badge earned!')}>
+            <div style={{fontSize: '32px', marginBottom: '4px'}}>🌅</div><div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em'}}>Early<br/>Bird</div>
+          </div>
+          <div style={{textAlign: 'center', cursor: 'pointer'}} onClick={() => showToast('☕','Café Hopper badge earned!')}>
+            <div style={{fontSize: '32px', marginBottom: '4px'}}>☕</div><div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em'}}>Café<br/>Hopper</div>
+          </div>
+          <div style={{textAlign: 'center', opacity: '.4', cursor: 'pointer'}} onClick={() => showToast('🔒','Earn 5 more XP to unlock!')}>
+            <div style={{fontSize: '32px', marginBottom: '4px'}}>🔮</div><div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em'}}>Mystery<br/>Locked</div>
+          </div>
+        </div>
+      </aside>
+
+      <div className="right-panel challenges-right">
+        <div className="challenges-hero">
+          <div className="ch-trophy">🏆</div>
+          <div className="ch-hero-text">
+            <h2>You're on a <em>roll!</em></h2>
+            <p>Keep exploring to maintain your streak and earn rare street cards.</p>
+            <div className="ch-streak">🔥 <strong>5-day streak</strong> — don't break it today!</div>
+          </div>
+        </div>
+        <div className="challenges-tabs">
+          <div className={`ctab ${filterMode === 'all' ? 'active' : ''}`} onClick={() => setFilterMode('all')}>All</div>
+          <div className={`ctab ${filterMode === 'active' ? 'active' : ''}`} onClick={() => setFilterMode('active')}>Active</div>
+          <div className={`ctab ${filterMode === 'completed' ? 'active' : ''}`} onClick={() => setFilterMode('completed')}>Completed</div>
+          <div className={`ctab ${filterMode === 'daily' ? 'active' : ''}`} onClick={() => setFilterMode('daily')}>Daily</div>
+        </div>
+        <div className="challenges-grid anim-in">
+          {data.map(ch => {
+            const pct = Math.round((ch.progress/ch.total)*100);
+            const done = ch.progress >= ch.total;
+            return (
+              <div key={ch.id} className={`challenge-card ${done ? 'completed' : ''}`} onClick={() => showToast(ch.icon, ch.title)}>
+                <div className="cc-top">
+                  <div className="cc-icon-wrap">{ch.icon}</div>
+                  <div className="cc-info">
+                    <div className="cc-title">{ch.title}</div>
+                    <div className="cc-desc">{ch.desc}</div>
+                    <div className="cc-reward">🎁 {ch.reward}</div>
+                  </div>
+                  {done && <div className="cc-complete-check">✅</div>}
+                </div>
+                <div className="cc-progress-wrap">
+                  <div className="cc-prog-track">
+                    <div className="cc-prog-fill" style={{width: `${pct}%`, background: ch.color}}></div>
+                  </div>
+                  <div className="cc-prog-lbl">{ch.progress} / {ch.total}{done && ' · Done'}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
