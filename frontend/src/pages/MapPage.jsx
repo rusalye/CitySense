@@ -2,11 +2,25 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { MAP_PLACES, MAP_STYLES } from '../data/mockData';
 import { NavLink } from 'react-router-dom';
+import { getEnvironment } from '../services/api';
+import { useGeolocation } from '../hooks/useGeolocation';
 
 export default function MapPage() {
   const { user, mode, setMode, showToast, theme } = useApp();
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const { location, startTracking } = useGeolocation();
+  const [env, setEnv] = useState({ temperature: 24, aqi: 50, aqi_grade: 'A+' });
+
+  useEffect(() => {
+    startTracking();
+  }, []);
+
+  useEffect(() => {
+    if (location) {
+      getEnvironment(location.lat, location.lng).then(setEnv).catch(console.error);
+    }
+  }, [location?.lat, location?.lng]);
 
   // Time & Greeting
   const [timeStr, setTimeStr] = useState('');
@@ -244,9 +258,9 @@ export default function MapPage() {
           
           <div className="sensory-panel">
             <div className="sp-header"><span className="sp-title">Sensory Awareness</span><div className="sp-pulse"></div></div>
-            <div className="sp-row"><span className="sp-icon">🔊</span><span className="sp-label">Noise</span><div className="sp-track"><div className={`sp-fill ${sensory.noise < 30 ? 'sf-green' : sensory.noise < 60 ? 'sf-yellow' : 'sf-red'}`} style={{width: `${sensory.noise}%`}}></div></div><span className="sp-val">{sensory.noise < 30 ? 'Low' : sensory.noise < 60 ? 'Mid' : 'High'}</span></div>
+            <div className="sp-row"><span className="sp-icon">🌡</span><span className="sp-label">Temp</span><div className="sp-track"><div className={`sp-fill sf-yellow`} style={{width: `60%`}}></div></div><span className="sp-val">{env.temperature}°C</span></div>
             <div className="sp-row"><span className="sp-icon">👥</span><span className="sp-label">Crowd</span><div className="sp-track"><div className="sp-fill sf-yellow" style={{width: `${sensory.crowd}%`}}></div></div><span className="sp-val">{sensory.crowd < 30 ? 'Low' : sensory.crowd < 60 ? 'Mid' : 'High'}</span></div>
-            <div className="sp-row"><span className="sp-icon">🌬</span><span className="sp-label">Air</span><div className="sp-track"><div className="sp-fill sf-green" style={{width: `${sensory.air}%`}}></div></div><span className="sp-val">{sensory.air > 70 ? 'Good' : sensory.air > 40 ? 'Fair' : 'Poor'}</span></div>
+            <div className="sp-row"><span className="sp-icon">🌬</span><span className="sp-label">Air AQI</span><div className="sp-track"><div className={`sp-fill ${env.aqi < 50 ? 'sf-green' : env.aqi < 100 ? 'sf-yellow' : 'sf-red'}`} style={{width: `${Math.min(100, Math.max(10, 100 - env.aqi))}%`}}></div></div><span className="sp-val">{env.aqi_grade}</span></div>
             <div className="sp-row"><span className="sp-icon">✨</span><span className="sp-label">Vibe</span><div className="sp-track"><div className="sp-fill sf-blue" style={{width: `${sensory.vibe}%`}}></div></div><span className="sp-val">{sensory.vibe > 80 ? 'High' : sensory.vibe > 50 ? 'Mid' : 'Low'}</span></div>
           </div>
 

@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { CHALLENGES_DATA } from '../data/mockData';
+import { getChallenges } from '../services/api';
 
 export default function ChallengesPage() {
   const { showToast } = useApp();
   const [filterMode, setFilterMode] = useState('all');
+  const [challengesData, setChallengesData] = useState([]);
+
+  useEffect(() => {
+    getChallenges().then(setChallengesData).catch(console.error);
+  }, []);
 
   const [timeStr, setTimeStr] = useState('');
   useEffect(() => {
@@ -19,10 +24,10 @@ export default function ChallengesPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const data = filterMode === 'all' ? CHALLENGES_DATA
-    : filterMode === 'active' ? CHALLENGES_DATA.filter(x => x.type === 'active')
-    : filterMode === 'completed' ? CHALLENGES_DATA.filter(x => x.type === 'completed')
-    : CHALLENGES_DATA.filter(x => x.daily);
+  const data = filterMode === 'all' ? challengesData
+    : filterMode === 'active' ? challengesData.filter(x => x.type === 'active')
+    : filterMode === 'completed' ? challengesData.filter(x => x.type === 'completed')
+    : challengesData.filter(x => x.daily);
 
   return (
     <div className="page active" id="page-challenges" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>

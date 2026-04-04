@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { JOURNAL_DATA } from '../data/mockData';
+import { getJournal } from '../services/api';
+import { useGeolocation } from '../hooks/useGeolocation';
 
 export default function JournalPage() {
   const { showToast } = useApp();
+  const [journalData, setJournalData] = useState([]);
+  const { isTracking, startTracking, stopTracking, distanceKm, steps } = useGeolocation();
+
+  useEffect(() => {
+    getJournal().then(setJournalData).catch(e => console.error(e));
+  }, []);
 
   const [timeStr, setTimeStr] = useState('');
   useEffect(() => {
@@ -24,12 +31,16 @@ export default function JournalPage() {
         <div className="greeting-block">
           <div className="greeting-time-line">{timeStr}</div>
           <div className="greeting-name">Your<br/><em>City Journal</em> 📖</div>
-          <div className="greeting-sub">Every walk tells a story. <span className="gs-hi">14 entries</span> written so far.</div>
+          <div className="greeting-sub">Every walk tells a story. <span className="gs-hi">{journalData.length} entries</span> written so far.</div>
         </div>
         <div className="sec-divider"><span className="sec-icon">◈</span><span className="sec-label">Journal Stats</span><div className="sec-line"></div></div>
         <div className="stats-grid">
-          <div className="stat-tile"><div className="stat-emoji">📝</div><div className="stat-num">14</div><div className="stat-lbl">Entries</div></div>
-          <div className="stat-tile"><div className="stat-emoji">🚶</div><div className="stat-num">38<sup>k</sup></div><div className="stat-lbl">Total km</div></div>
+          <div className="stat-tile"><div className="stat-emoji">📝</div><div className="stat-num">{journalData.length}</div><div className="stat-lbl">Entries</div></div>
+          {isTracking ? (
+             <div className="stat-tile" style={{border: '1px solid var(--teal)'}}><div className="stat-emoji">👟</div><div className="stat-num" style={{color: 'var(--teal)'}}>{steps}</div><div className="stat-lbl">Live Steps</div></div>
+          ) : (
+             <div className="stat-tile"><div className="stat-emoji">🚶</div><div className="stat-num">38<sup>k</sup></div><div className="stat-lbl">Total km</div></div>
+          )}
           <div className="stat-tile"><div className="stat-emoji">🗺</div><div className="stat-num">12</div><div className="stat-lbl">Zones</div></div>
         </div>
         
@@ -44,10 +55,14 @@ export default function JournalPage() {
       <div className="right-panel journal-right">
         <div className="journal-header">
           <div className="section-h">Walking <em>Stories</em></div>
-          <button className="add-btn" onClick={() => showToast('📝','New entry started!')}>＋ New Entry</button>
+          {isTracking ? (
+              <button className="add-btn" style={{background: 'var(--card)', color: 'var(--red)', border: '1px solid var(--red)'}} onClick={() => { stopTracking(); showToast('🛑', `Walk ended. ${steps} steps logged!`); }}>■ End Walk ({distanceKm.toFixed(2)}km)</button>
+          ) : (
+              <button className="add-btn" onClick={() => { startTracking(); showToast('👟','Walk started. Tracking live steps!'); }}>▶ Start Walk</button>
+          )}
         </div>
         <div className="journal-timeline anim-in">
-          {JOURNAL_DATA.map((j, i) => (
+          {journalData.map((j, i) => (
             <div key={i} className="journal-entry" onClick={() => showToast('📖','Opening entry...')}>
               <div className="je-date">
                 {j.date}

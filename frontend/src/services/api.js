@@ -2,5 +2,72 @@ const API_BASE = "http://127.0.0.1:8000";
 
 export const getZones = async () => {
   const res = await fetch(`${API_BASE}/zones`);
+  if (!res.ok) throw new Error("Failed to fetch zones");
   return res.json();
 };
+
+export const getEnvironment = async (lat, lng) => {
+  const res = await fetch(`${API_BASE}/environment?lat=${lat}&lng=${lng}`);
+  if (!res.ok) throw new Error("Failed to fetch environment");
+  return res.json();
+};
+
+export const getChapters = async () => {
+    const res = await fetch(`${API_BASE}/chapters`);
+    if (!res.ok) throw new Error("Failed to fetch chapters");
+    return res.json();
+}
+
+export const getJournal = async () => {
+    const res = await fetch(`${API_BASE}/journal`);
+    if (!res.ok) throw new Error("Failed to fetch journal");
+    return res.json();
+}
+
+export const createJournal = async (entry) => {
+    const res = await fetch(`${API_BASE}/journal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry),
+    });
+    if (!res.ok) throw new Error("Failed to create journal");
+    return res.json();
+}
+
+export const getChallenges = async () => {
+    const res = await fetch(`${API_BASE}/challenges`);
+    if (!res.ok) throw new Error("Failed to fetch challenges");
+    return res.json();
+}
+
+export const getCards = async () => {
+    const res = await fetch(`${API_BASE}/cards`);
+    if (!res.ok) throw new Error("Failed to fetch cards");
+    return res.json();
+}
+
+export const authRegister = async (email, password) => {
+    const res = await fetch(`${API_BASE}/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Registration failed");
+    }
+    return res.json();
+}
+
+export const authLogin = async (email, password) => {
+    const res = await fetch(`${API_BASE}/users/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Login failed");
+    }
+    return res.json();
+}

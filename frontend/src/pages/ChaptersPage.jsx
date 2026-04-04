@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { CITIES_DATA } from '../data/mockData';
+import { getChapters } from '../services/api';
 
 export default function ChaptersPage() {
   const { showToast } = useApp();
   const [activeCityId, setActiveCityId] = useState('bengaluru');
+  const [citiesData, setCitiesData] = useState([]);
+
+  useEffect(() => {
+    getChapters().then(setCitiesData).catch(e => console.error(e));
+  }, []);
 
   const [timeStr, setTimeStr] = useState('');
   useEffect(() => {
@@ -19,7 +24,7 @@ export default function ChaptersPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const activeCity = CITIES_DATA.find(c => c.id === activeCityId);
+  const activeCity = citiesData.find(c => c.id === activeCityId);
 
   return (
     <div className="page active" id="page-chapters" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>
@@ -32,7 +37,7 @@ export default function ChaptersPage() {
 
         <div className="sec-divider"><span className="sec-icon">🌆</span><span className="sec-label">Your Cities</span><div className="sec-line"></div></div>
         <div className="city-selector">
-          {CITIES_DATA.map(city => (
+          {citiesData.map(city => (
             <div 
               key={city.id} 
               className={`city-pill ${activeCityId === city.id ? 'selected' : ''}`} 
@@ -82,7 +87,7 @@ export default function ChaptersPage() {
         </div>
 
         <div className="ch-chapters-list anim-in" style={{paddingBottom: '32px'}}>
-          {CITIES_DATA.map(city => {
+          {citiesData.map(city => {
             const isActive = city.id === activeCityId;
             return (
               <div key={city.id} className={`city-block ${isActive ? 'city-active' : ''}`}>

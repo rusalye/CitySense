@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { CARDS_DATA } from '../data/mockData';
+import { getCards } from '../services/api';
 
 export default function CardsPage() {
   const { showToast } = useApp();
   const [filterMode, setFilterMode] = useState('all');
+  const [cardsData, setCardsData] = useState([]);
+
+  useEffect(() => {
+    getCards().then(setCardsData).catch(console.error);
+  }, []);
 
   const [timeStr, setTimeStr] = useState('');
   useEffect(() => {
@@ -19,7 +24,7 @@ export default function CardsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  let data = CARDS_DATA;
+  let data = cardsData;
   if (filterMode === 'collected') data = data.filter(x => x.collected);
   else if (filterMode === 'locked') data = data.filter(x => !x.collected);
   else if (filterMode === 'rare') data = data.filter(x => x.rarity === 'rare' || x.rarity === 'epic' || x.rarity === 'legendary');

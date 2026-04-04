@@ -1,10 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { DISCOVERIES, POPULAR } from '../data/mockData';
+import { getZones, getEnvironment } from '../services/api';
+import { useGeolocation } from '../hooks/useGeolocation';
 
 export default function ExplorePage() {
   const { showToast } = useApp();
   const [filterMode, setFilterMode] = useState('all');
+  const [zones, setZones] = useState([]);
+  const [env, setEnv] = useState({ temperature: 24, aqi_grade: 'A+', weather_code: 0 });
+  const { location, startTracking } = useGeolocation();
+
+  useEffect(() => {
+    getZones().then(setZones).catch(console.error);
+    startTracking();
+  }, []);
+
+  useEffect(() => {
+    if (location) {
+      getEnvironment(location.lat, location.lng).then(setEnv).catch(console.error);
+    }
+  }, [location?.lat, location?.lng]);
 
   // Time & Greeting
   const [timeStr, setTimeStr] = useState('');
@@ -19,6 +34,9 @@ export default function ExplorePage() {
     const interval = setInterval(updateTime, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const DISCOVERIES = zones.filter(z => z.type === 'discover');
+  const POPULAR = zones.filter(z => z.type === 'popular');
 
   const displayedDiscoveries = filterMode === 'all' 
     ? DISCOVERIES 
@@ -58,10 +76,10 @@ export default function ExplorePage() {
         </div>
 
         <div className="sec-divider"><span className="sec-icon">★</span><span className="sec-label">City Score Today</span><div className="sec-line"></div></div>
-        <div className="stats-grid">
+        <div className="stats-grid" style={{ marginBottom: "20px" }}>
           <div className="stat-tile"><div className="stat-emoji">🌿</div><div className="stat-num">82<sup>%</sup></div><div className="stat-lbl">Calm</div></div>
-          <div className="stat-tile"><div className="stat-emoji">🌬</div><div className="stat-num">A<sup>+</sup></div><div className="stat-lbl">Air</div></div>
-          <div className="stat-tile"><div className="stat-emoji">🌡</div><div className="stat-num">24<sup>°</sup></div><div className="stat-lbl">Temp</div></div>
+          <div className="stat-tile"><div className="stat-emoji">🌬</div><div className="stat-num">{env.aqi_grade}</div><div className="stat-lbl">Air</div></div>
+          <div className="stat-tile"><div className="stat-emoji">🌡</div><div className="stat-num">{env.temperature}<sup>°</sup></div><div className="stat-lbl">Temp</div></div>
         </div>
       </aside>
 
@@ -71,7 +89,7 @@ export default function ExplorePage() {
           <p>Curated urban discoveries based on your Calm mode, time of day, and walking distance from you.</p>
           <div className="explore-hero-meta">
             <span className="badge badge-teal">🌿 Calm Day</span>
-            <span className="badge badge-gold">🌤 24° Bengaluru</span>
+            <span className="badge badge-gold">🌤 {env.temperature}° Bengaluru</span>
             <span className="badge badge-sky">📍 7 places nearby</span>
           </div>
         </div>

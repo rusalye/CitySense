@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../assets/styles/AuthPage.css'
+import { authLogin, authRegister } from '../services/api'
 
 function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -32,13 +33,10 @@ function AuthPage() {
 
     setLoading(true)
     try {
-      // TODO: Replace with actual API call
-      console.log('Logging in', { email, password })
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500))
-      navigate('/app', { state: { user: email } })
+      const userData = await authLogin(email, password)
+      navigate('/app', { state: { user: userData } })
     } catch (err) {
-      setError('Login failed. Please try again.')
+      setError(err.message || 'Login failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -65,13 +63,10 @@ function AuthPage() {
 
     setLoading(true)
     try {
-      // TODO: Replace with actual API call
-      console.log('Signing up', { email, password })
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500))
-      navigate('/app', { state: { user: email } })
+      const userData = await authRegister(email, password)
+      navigate('/app', { state: { user: userData } })
     } catch (err) {
-      setError('Sign up failed. Please try again.')
+      setError(err.message || 'Sign up failed. Please try again.')
     } finally {
       setLoading(false)
     }
