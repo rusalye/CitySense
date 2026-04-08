@@ -46,11 +46,11 @@ export const getCards = async () => {
     return res.json();
 }
 
-export const authRegister = async (email, password) => {
+export const authRegister = async (email, password, name, username, age, phone) => {
     const res = await fetch(`${API_BASE}/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, name, username, age, phone }),
     });
     if (!res.ok) {
         const err = await res.json();

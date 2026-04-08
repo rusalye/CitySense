@@ -1,19 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { MAP_PLACES, MAP_STYLES } from '../data/mockData';
+import { MAP_STYLES } from '../data/mockData';
 import { NavLink } from 'react-router-dom';
-import { getEnvironment } from '../services/api';
+import { getEnvironment, getZones } from '../services/api';
 import { useGeolocation } from '../hooks/useGeolocation';
 
 export default function MapPage() {
   const { user, mode, setMode, showToast, theme } = useApp();
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const dirRenderer = useRef(null);
+  const dirService = useRef(null);
+  const markersRef = useRef([]);
   const { location, startTracking } = useGeolocation();
   const [env, setEnv] = useState({ temperature: 24, aqi: 50, aqi_grade: 'A+' });
+  const [zones, setZones] = useState([]);
+  const [selectedZone, setSelectedZone] = useState(null);
 
   useEffect(() => {
     startTracking();
+    getZones().then(setZones).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -62,29 +68,62 @@ export default function MapPage() {
           disableDefaultUI: true, gestureHandling: 'greedy',
         });
         
-        MAP_PLACES.forEach((p, i) => {
-          const m = new window.google.maps.Marker({
-            position: { lat: p.lat, lng: p.lng }, map: mapInstance.current,
-            icon: {
-              path: 'M 0,-16 C -9,-16 -16,-9 -16,0 C -16,9 0,22 0,22 C 0,22 16,9 16,0 C 16,-9 9,-16 0,-16 Z',
-              fillColor: p.color, fillOpacity: .92, strokeColor: 'rgba(255,255,255,.25)', 
-              strokeWeight: 1.5, scale: 1, anchor: new window.google.maps.Point(0, 22), 
-              labelOrigin: new window.google.maps.Point(0, 0)
-            },
-            label: { text: p.emoji, fontSize: '14px' },
-            animation: window.google.maps.Animation.DROP,
-          });
-          m.addListener('click', () => {
-             // Handle place click mapping behavior natively to React state if needed.
-             // Currently invoking toast to emulate interaction.
-             showToast(p.emoji, `Picked ${p.emoji} area!`);
-             mapInstance.current.setCenter({ lat: p.lat, lng: p.lng });
-          });
+        dirService.current = new window.google.maps.DirectionsService();
+        dirRenderer.current = new window.google.maps.DirectionsRenderer({
+          map: mapInstance.current, suppressMarkers: true,
+          polylineOptions: { strokeColor: '#5eb88a', strokeOpacity: 0.8, strokeWeight: 5 }
         });
       }
     }, 500);
-    return () => clearInterval(checkGoogleMaps);
-  }, []);
+    return () => {
+      clearInterval(checkGoogleMaps);
+      mapInstance.current = null;
+    };
+  }, [theme, mode]);
+
+  // Route Drawing Logic
+  const drawRoute = (dest) => {
+    if (!dirService.current || !dirRenderer.current) return;
+    const origin = location ? { lat: location.lat, lng: location.lng } : { lat: 12.9716, lng: 77.5946 };
+    dirService.current.route({
+      origin: origin,
+      destination: dest,
+      travelMode: window.google.maps.TravelMode.WALKING
+    }, (result, status) => {
+      if (status === 'OK') {
+        dirRenderer.current.setDirections(result);
+        showToast('⇝', 'Route plotted!');
+      } else {
+        showToast('⚠️', 'Route unavailable');
+      }
+    });
+  };
+
+  // Render Dynamic Zones
+  useEffect(() => {
+    if (!mapInstance.current || !window.google) return;
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+    zones.forEach(p => {
+      const m = new window.google.maps.Marker({
+        position: { lat: p.lat, lng: p.lng }, map: mapInstance.current,
+        icon: {
+          path: 'M 0,-16 C -9,-16 -16,-9 -16,0 C -16,9 0,22 0,22 C 0,22 16,9 16,0 C 16,-9 9,-16 0,-16 Z',
+          fillColor: p.color, fillOpacity: .92, strokeColor: 'rgba(255,255,255,.25)', 
+          strokeWeight: 1.5, scale: 1, anchor: new window.google.maps.Point(0, 22), 
+          labelOrigin: new window.google.maps.Point(0, 0)
+        },
+        label: { text: p.emoji, fontSize: '14px' },
+        animation: window.google.maps.Animation.DROP,
+      });
+      m.addListener('click', () => {
+         showToast(p.emoji, p.title);
+         mapInstance.current.setCenter({ lat: p.lat, lng: p.lng });
+         setSelectedZone(p);
+      });
+      markersRef.current.push(m);
+    });
+  }, [zones, location]);
 
   // Map Style Reactivity Layer
   useEffect(() => {
@@ -110,7 +149,7 @@ export default function MapPage() {
   };
 
   return (
-    <div className="page active full-right map-container-grid" id="page-map" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>
+    <div className="page active map-container-grid" id="page-map" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>
       
       {/* LEFT PANEL */}
       <aside className="left-panel anim-in">
@@ -177,46 +216,22 @@ export default function MapPage() {
         {/* Nearby list */}
         <div className="sec-divider"><span className="sec-icon">◉</span><span className="sec-label">Nearby</span><div className="sec-line"></div></div>
         <div className="places-list">
-          <div className="place-row" onClick={() => showToast('🌳', 'Cubbon Park')}>
-            <div className="place-thumb">🌳</div>
+          {zones.map(z => (
+          <div key={z.id} className="place-row" onClick={() => {
+              showToast(z.emoji, z.title);
+              if(mapInstance.current) {
+                mapInstance.current.setCenter({lat: z.lat, lng: z.lng});
+                setSelectedZone(z);
+              }
+            }}>
+            <div className="place-thumb">{z.emoji}</div>
             <div className="place-details">
-              <div className="place-name-row"><span className="place-nm">Cubbon Park</span><span className="place-hot">Trending</span></div>
-              <div className="place-meta-row"><span className="place-dist">150m</span><span className="place-tag">Green</span><span className="place-mode-dot" style={{background:'var(--teal)'}}></span></div>
+              <div className="place-name-row"><span className="place-nm">{z.title}</span>{parseFloat(z.rating) >= 4.8 && <span className="place-hot">Trending</span>}</div>
+              <div className="place-meta-row"><span className="place-dist">{z.dist}</span><span className="place-tag">{z.badgeTxt}</span><span className="place-mode-dot" style={{background:z.color}}></span></div>
             </div>
-            <div className="place-rating"><span className="rating-num">4.8</span><span className="rating-stars">★★★★★</span></div>
+            <div className="place-rating"><span className="rating-num">{z.rating}</span><span className="rating-stars">★★★★★</span></div>
           </div>
-          <div className="place-row" onClick={() => showToast('☕', 'Matteo Coffee')}>
-            <div className="place-thumb">☕</div>
-            <div className="place-details">
-              <div className="place-name-row"><span className="place-nm">Matteo Coffee</span></div>
-              <div className="place-meta-row"><span className="place-dist">320m</span><span class="place-tag">Café</span><span className="place-mode-dot" style={{background:'var(--gold)'}}></span></div>
-            </div>
-            <div className="place-rating"><span className="rating-num">4.6</span><span className="rating-stars">★★★★½</span></div>
-          </div>
-          <div className="place-row" onClick={() => showToast('🎨', 'Pottery Lane')}>
-            <div className="place-thumb">🎨</div>
-            <div className="place-details">
-              <div className="place-name-row"><span className="place-nm">Pottery Lane</span><span className="place-hot">Hidden Gem</span></div>
-              <div className="place-meta-row"><span className="place-dist">0.8km</span><span className="place-tag">Art</span><span className="place-mode-dot" style={{background:'var(--plum2)'}}></span></div>
-            </div>
-            <div className="place-rating"><span className="rating-num">4.9</span><span className="rating-stars">★★★★★</span></div>
-          </div>
-          <div className="place-row" onClick={() => showToast('🚶', 'MG Road Walk')}>
-            <div className="place-thumb">🚶</div>
-            <div className="place-details">
-              <div className="place-name-row"><span className="place-nm">MG Road Walk</span></div>
-              <div className="place-meta-row"><span className="place-dist">1.2km</span><span className="place-tag">Heritage</span><span className="place-mode-dot" style={{background:'var(--sky)'}}></span></div>
-            </div>
-            <div className="place-rating"><span className="rating-num">4.5</span><span className="rating-stars">★★★★½</span></div>
-          </div>
-          <div className="place-row" onClick={() => showToast('🌊', 'Ulsoor Lake Walk')}>
-            <div className="place-thumb">🌊</div>
-            <div className="place-details">
-              <div className="place-name-row"><span className="place-nm">Ulsoor Lake</span><span className="place-hot">Sunrise</span></div>
-              <div className="place-meta-row"><span className="place-dist">1.8km</span><span className="place-tag">Lakeside</span><span className="place-mode-dot" style={{background:'var(--teal)'}}></span></div>
-            </div>
-            <div className="place-rating"><span className="rating-num">4.7</span><span className="rating-stars">★★★★★</span></div>
-          </div>
+          ))}
         </div>
 
         {/* STREET CARDS */}
@@ -234,7 +249,7 @@ export default function MapPage() {
       </aside>
 
       {/* RIGHT PANEL: MAP */}
-      <div className="right-panel">
+      <div className="right-panel" style={{ height: '100%' }}>
         <div id="map" ref={mapRef} style={{ width: '100%', height: '100%' }}></div>
         <div className="map-vignette"></div>
         
@@ -285,6 +300,35 @@ export default function MapPage() {
               <div style={{fontSize:'10px',fontFamily:'Courier Prime,monospace',color:'var(--text3)',marginBottom:'6px'}}>Chapter II · Bengaluru</div>
               <div className="cc-progress"><div className="cc-track"><div className="cc-fill" style={{width:'40%'}}></div></div><span className="cc-pct">40%</span></div>
             </div>
+
+            {selectedZone && (
+              <div className="place-card show" id="place-card">
+                <div className="pc-top">
+                  <div className="pc-icon">{selectedZone.emoji}</div>
+                  <div>
+                     <div className="pc-title">{selectedZone.title}</div>
+                     <div className="pc-sub" style={{ fontSize: '11px', color: 'var(--text2)', marginTop: '2px' }}>{selectedZone.dist} · {selectedZone.sub.split('.')[0]}</div>
+                  </div>
+                  <div className="pc-close" onClick={() => setSelectedZone(null)}>✕</div>
+                </div>
+                <div className="pc-tags" style={{ padding: '0 20px', marginBottom: '12px', display: 'flex', gap: '6px' }}>
+                  <span className={`badge badge-${selectedZone.badge}`}>{selectedZone.badgeTxt}</span>
+                  <span className="badge badge-sky" style={{textTransform: 'capitalize'}}>{selectedZone.mode}</span>
+                  <span className="badge badge-gold">★ {selectedZone.rating}</span>
+                </div>
+                <div className="pc-stats">
+                  <div className="pcs"><div className="pcs-val">Low</div><div className="pcs-lbl">Crowd</div></div>
+                  <div className="pcs"><div className="pcs-val">{selectedZone.rating}</div><div className="pcs-lbl">Rating</div></div>
+                  <div className="pcs"><div className="pcs-val" style={{textTransform: 'capitalize'}}>{selectedZone.mode}</div><div className="pcs-lbl">Mode Fit</div></div>
+                </div>
+                <button className="pc-btn" onClick={() => {
+                   drawRoute({ lat: selectedZone.lat, lng: selectedZone.lng });
+                   setSelectedZone(null);
+                }}>
+                  <span>✦</span> Take me there
+                </button>
+              </div>
+            )}
           </div>
 
         </div>

@@ -9,15 +9,16 @@ export function AppProvider({ children }) {
   const [activeCity, setActiveCity] = useState('bengaluru');
   
   // Base user state for mock features
-  const [user] = useState({
-    name: 'Swetha Pai',
-    initial: 'S',
-    level: 7,
-    xp: 2840,
-    xpNext: 4200,
-    rank: 'Urban Wanderer',
-    streak: 5
-  });
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('citysense_user')) || null);
+
+  // Sync user state with localStorage to persist login
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('citysense_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('citysense_user');
+    }
+  }, [user]);
 
   // Apply theme to document
   useEffect(() => {
@@ -41,7 +42,7 @@ export function AppProvider({ children }) {
       toastData, showToast,
       mode, setMode,
       activeCity, setActiveCity,
-      user
+      user, setUser
     }}>
       {children}
     </AppContext.Provider>

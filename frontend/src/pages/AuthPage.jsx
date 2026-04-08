@@ -2,12 +2,18 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../assets/styles/AuthPage.css'
 import { authLogin, authRegister } from '../services/api'
+import { useApp } from '../context/AppContext'
 
 function AuthPage() {
+  const { setUser } = useApp()
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
+  const [age, setAge] = useState('')
+  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -34,6 +40,7 @@ function AuthPage() {
     setLoading(true)
     try {
       const userData = await authLogin(email, password)
+      setUser(userData)
       navigate('/app', { state: { user: userData } })
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.')
@@ -51,6 +58,17 @@ function AuthPage() {
       return
     }
     
+    if (!name || !username || !age || !phone) {
+      setError('Please fill in all fields')
+      return
+    }
+
+    const ageInt = parseInt(age, 10)
+    if (isNaN(ageInt) || ageInt < 8) {
+      setError('You must be at least 8 years old to join')
+      return
+    }
+    
     if (password.length < 6) {
       setError('Password must be at least 6 characters')
       return
@@ -63,7 +81,8 @@ function AuthPage() {
 
     setLoading(true)
     try {
-      const userData = await authRegister(email, password)
+      const userData = await authRegister(email, password, name, username, parseInt(age, 10), phone)
+      setUser(userData)
       navigate('/app', { state: { user: userData } })
     } catch (err) {
       setError(err.message || 'Sign up failed. Please try again.')
@@ -132,6 +151,39 @@ function AuthPage() {
           ) : (
             <form onSubmit={handleSignupSubmit} className="auth-form">
               <h2>Join CitySense</h2>
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={loading}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Username (@handle)"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={loading}
+                required
+              />
+              <input
+                type="number"
+                placeholder="Age"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                disabled={loading}
+                required
+                min="8"
+              />
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                disabled={loading}
+                required
+              />
               <input
                 type="email"
                 placeholder="Email address"

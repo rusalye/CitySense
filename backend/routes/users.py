@@ -20,8 +20,11 @@ async def register(user: UserCreate, request: Request):
     new_user = {
         "email": user.email,
         "password_hash": hash_pass(user.password),
-        "name": "New Voyager",
-        "initial": "V",
+        "name": user.name,
+        "username": user.username,
+        "age": user.age,
+        "phone": user.phone,
+        "initial": user.name[0].upper() if user.name else "V",
         "level": 1,
         "rank": "Novice",
         "xp": 0

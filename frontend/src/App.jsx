@@ -8,7 +8,15 @@ import ChallengesPage from './pages/ChallengesPage';
 import CardsPage from './pages/CardsPage';
 import ChaptersPage from './pages/ChaptersPage';
 import SettingsPage from './pages/SettingsPage';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
+
+const ProtectedRoute = ({ children }) => {
+  const { user } = useApp();
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
 
 export default function App() {
   return (
@@ -16,7 +24,7 @@ export default function App() {
       <Router>
         <Routes>
           <Route path="/" element={<AuthPage />} />
-          <Route path="/app" element={<MainLayout />}>
+          <Route path="/app" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="map" replace />} />
             <Route path="map" element={<MapPage />} />
             <Route path="explore" element={<ExplorePage />} />
