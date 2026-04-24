@@ -16,6 +16,10 @@ function AuthPage() {
   const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  
+  // Enhancement: Toggle password visibility
+  const [showPassword, setShowPassword] = useState(false)
+  
   const navigate = useNavigate()
 
   const validateEmail = (email) => {
@@ -136,14 +140,27 @@ function AuthPage() {
                 disabled={loading}
                 required
               />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-                required
-              />
+              
+              {/* Enhancement: Password visibility toggle */}
+              <div className="password-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+                <button 
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex="-1"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+
               <button type="submit" className="submit-btn" disabled={loading}>
                 {loading ? 'Signing In...' : 'Sign In'}
               </button>
@@ -192,22 +209,38 @@ function AuthPage() {
                 disabled={loading}
                 required
               />
-              <input
-                type="password"
-                placeholder="Password (min 6 characters)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Confirm password"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                disabled={loading}
-                required
-              />
+              
+              {/* Enhancement: Password visibility toggle */}
+              <div className="password-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password (min 6 characters)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+                <button 
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex="-1"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+              
+              <div className="password-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Confirm password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+              </div>
+
               <button type="submit" className="submit-btn" disabled={loading}>
                 {loading ? 'Signing Up...' : 'Sign Up'}
               </button>

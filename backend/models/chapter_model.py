@@ -20,6 +20,9 @@ class Chapter(BaseModel):
     status: str # 'active', 'complete', 'locked'
     xp: int
     card: str
+    centerLat: float = 12.9716
+    centerLng: float = 77.5946
+    sensoryBase: Optional[dict] = None
 
 class City(BaseModel):
     id: str

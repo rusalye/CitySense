@@ -16,3 +16,7 @@ class Zone(BaseModel):
     lng: float
     type: str # 'discover', 'popular', 'mapOnly', etc.
     color: Optional[str] = None
+    chapter_id: Optional[str] = None
+    card_name: Optional[str] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None

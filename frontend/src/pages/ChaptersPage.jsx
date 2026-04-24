@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { getChapters } from '../services/api';
 
 export default function ChaptersPage() {
-  const { showToast } = useApp();
+  const { showToast, setActiveChapter } = useApp();
+  const navigate = useNavigate();
   const [activeCityId, setActiveCityId] = useState('bengaluru');
   const [citiesData, setCitiesData] = useState([]);
 
@@ -117,10 +119,22 @@ export default function ChaptersPage() {
                 {isActive && !city.comingSoon && (
                   <div className="city-chapters-list">
                     {city.chapters.map(ch => {
-                      const statusIcon = ch.status === 'complete' ? '✅' : ch.status === 'active' ? '🔶' : '🔒';
+                      const statusIcon = ch.status === 'complete' ? '✅' : '🔶';
+                      const handleChapterClick = () => {
+                        setActiveChapter({
+                          id: ch.id,
+                          name: ch.area,
+                          num: ch.num,
+                          centerLat: ch.centerLat || 12.9716,
+                          centerLng: ch.centerLng || 77.5946,
+                          sensoryBase: ch.sensoryBase || { noise: 50, crowd: 50, air: 50, vibe: 50 }
+                        });
+                        showToast(ch.emoji, `Exploring ${ch.area}`);
+                        navigate('/app/map');
+                      };
                       return (
-                        <div key={ch.id} className={`chapter-item ${ch.status === 'active' ? 'active-ch' : ''} ${ch.status === 'locked' ? 'locked-ch' : ''}`} onClick={() => ch.status === 'locked' ? showToast('🔒', `Complete ${ch.area} first!`) : showToast(ch.emoji, `${ch.area} — ${ch.status === 'complete' ? 'Completed!' : 'In Progress'}`)}>
-                          <div className="ci-num" style={ch.status !== 'locked' ? {borderColor: `${ch.colorHex}55`, color: ch.colorHex, background: `${ch.colorHex}12`} : {}}>
+                        <div key={ch.id} className={`chapter-item ${ch.status === 'active' ? 'active-ch' : ''}`} onClick={handleChapterClick}>
+                          <div className="ci-num" style={{borderColor: `${ch.colorHex}55`, color: ch.colorHex, background: `${ch.colorHex}12`}}>
                             {ch.emoji}
                           </div>
                           <div className="ci-info">
@@ -141,7 +155,7 @@ export default function ChaptersPage() {
                             </div>
                             <div className="ci-progress" style={{marginTop: '8px'}}>
                               <div className="ci-track"><div className="ci-fill" style={{width: `${ch.progress}%`, background: ch.colorHex}}></div></div>
-                              <div className="ci-pct">{ch.status === 'locked' ? '🔒' : ch.progress + '%'}</div>
+                              <div className="ci-pct">{ch.progress + '%'}</div>
                             </div>
                             <div className="ci-reward">🎁 {ch.xp} XP · {ch.card}</div>
                           </div>

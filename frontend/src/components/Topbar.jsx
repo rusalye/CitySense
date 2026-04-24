@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 
 export default function Topbar() {
-  const { theme, toggleTheme, showToast, user } = useApp();
+  const { theme, toggleTheme, showToast, user, env } = useApp();
   const [timeStr, setTimeStr] = useState('');
 
-  // Example placeholder weather
-  const weather = { temp: '24°', desc: 'Partly cloudy', icon: '🌤' };
+  // Live real-time environment data
+  const weather = { temp: `${env.temperature}°`, desc: env.weather_desc, icon: env.weather_icon || '⛅' };
 
   return (
     <header className="topbar">
