@@ -38,11 +38,11 @@
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{font-size:14px;}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .4s,color .4s;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);height:100dvh;overflow:hidden;transition:background .4s,color .4s;}
 body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.6;}
 
 /* ── SHELL ── */
-.shell{display:grid;grid-template-columns:68px 1fr;grid-template-rows:58px 1fr;height:100vh;width:100vw;}
+.shell{display:grid;grid-template-columns:68px 1fr;grid-template-rows:58px 1fr;height:100dvh;width:100vw;}
 
 /* ══════════════════════════════════════════
    TOPBAR
@@ -101,7 +101,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 .content-area{display:grid;grid-template-columns:360px 1fr;overflow:hidden;position:relative;}
 
 /* pages hide/show */
-.page{display:none;grid-column:1/-1;grid-template-columns:360px 1fr;height:calc(100vh - 58px);}
+.page{display:none;grid-column:1/-1;grid-template-columns:360px 1fr;height:calc(100dvh - 58px);}
 .page.active{display:grid;}
 /* pages with only right panel (no sidebar content) */
 .page.full-right{grid-template-columns:1fr;}
@@ -567,7 +567,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 .page{animation:fadeSlideIn .35s cubic-bezier(.4,0,.2,1);}
 
 /* scrollable right panels */
-.explore-right,.journal-right,.challenges-right,.cards-right,.chapters-right,.settings-right{height:calc(100vh - 58px);scrollbar-width:thin;scrollbar-color:var(--bg3) transparent;}
+.explore-right,.journal-right,.challenges-right,.cards-right,.chapters-right,.settings-right{height:calc(100dvh - 58px);scrollbar-width:thin;scrollbar-color:var(--bg3) transparent;}
 .explore-right::-webkit-scrollbar,.journal-right::-webkit-scrollbar,.challenges-right::-webkit-scrollbar,
 .cards-right::-webkit-scrollbar,.chapters-right::-webkit-scrollbar,.settings-right::-webkit-scrollbar{width:3px;}
 .explore-right::-webkit-scrollbar-thumb,.journal-right::-webkit-scrollbar-thumb,.challenges-right::-webkit-scrollbar-thumb,
@@ -597,11 +597,11 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
   
   .page {
     grid-template-columns: 1fr;
-    height: calc(100vh - 118px);
+    height: calc(100dvh - 118px);
   }
 
   .explore-right, .journal-right, .challenges-right, .cards-right, .chapters-right, .settings-right {
-    height: calc(100vh - 118px);
+    height: calc(100dvh - 118px);
     padding: 16px;
   }
 
@@ -609,7 +609,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
   .map-container-grid {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 40vh;
-    height: calc(100vh - 118px);
+    height: calc(100dvh - 118px);
   }
 
   /* Hide left panel on map page to save space */
