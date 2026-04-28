@@ -305,7 +305,7 @@ export default function MapPage() {
   };
 
   return (
-    <div className="page active map-container-grid" id="page-map" style={{ display: 'grid', gridTemplateColumns: `320px 1fr ${rightPanelWidth}px` }}>
+    <div className="page active map-container-grid" id="page-map" style={{ '--right-panel-width': `${rightPanelWidth}px` }}>
       
       {/* LEFT PANEL */}
       <aside className="left-panel anim-in">
