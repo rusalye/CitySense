@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 
 // Haversine formula to calculate distance between two coordinates in km
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -24,42 +26,91 @@ export function useGeolocation() {
   useEffect(() => {
     let watchId;
     
-    if (isTracking && navigator.geolocation) {
-      watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          setLocation({ lat, lng });
-          setError(null);
-          
-          setLastPoint((prev) => {
-            if (prev) {
-              const dist = calculateDistance(prev.lat, prev.lng, lat, lng);
-              // Only add if moving more than ~5 meters to prevent GPS jitter drift
-              if (dist > 0.005) {
-                setDistanceKm(d => d + dist);
-                return { lat, lng };
-              }
-              return prev; // Not moved enough
+    const startNativeTracking = async () => {
+      try {
+        const hasPermission = await Geolocation.checkPermissions();
+        if (hasPermission.location !== 'granted') {
+           const req = await Geolocation.requestPermissions();
+           if (req.location !== 'granted') {
+              setError("Location permission denied");
+              return;
+           }
+        }
+        watchId = await Geolocation.watchPosition({ enableHighAccuracy: true, timeout: 5000, maximumAge: 10000 }, (pos, err) => {
+            if (err) {
+               setError(err.message);
+               return;
             }
-            return { lat, lng }; // First point
-          });
-        },
-        (err) => {
-          setError(err.message);
-        },
-        { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
-      );
+            if (pos) {
+              const lat = pos.coords.latitude;
+              const lng = pos.coords.longitude;
+              setLocation({ lat, lng });
+              setError(null);
+              
+              setLastPoint((prev) => {
+                if (prev) {
+                  const dist = calculateDistance(prev.lat, prev.lng, lat, lng);
+                  // Only add if moving more than ~5 meters to prevent GPS jitter drift
+                  if (dist > 0.005) {
+                    setDistanceKm(d => d + dist);
+                    return { lat, lng };
+                  }
+                  return prev; 
+                }
+                return { lat, lng }; 
+              });
+            }
+        });
+      } catch (err) {
+         setError(err.message);
+      }
+    };
+
+    if (isTracking) {
+      if (Capacitor.isNativePlatform()) {
+         startNativeTracking();
+      } else if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            setLocation({ lat, lng });
+            setError(null);
+            
+            setLastPoint((prev) => {
+              if (prev) {
+                const dist = calculateDistance(prev.lat, prev.lng, lat, lng);
+                if (dist > 0.005) {
+                  setDistanceKm(d => d + dist);
+                  return { lat, lng };
+                }
+                return prev;
+              }
+              return { lat, lng };
+            });
+          },
+          (err) => {
+            setError(err.message);
+          },
+          { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+        );
+      }
     }
 
     return () => {
-      if (watchId) navigator.geolocation.clearWatch(watchId);
+      if (watchId) {
+        if (Capacitor.isNativePlatform()) {
+           Geolocation.clearWatch({ id: watchId }).catch(e => console.error(e));
+        } else {
+           navigator.geolocation.clearWatch(watchId);
+        }
+      }
     };
   }, [isTracking]);
 
   const startTracking = () => {
     setIsTracking(true);
-    setDistanceKm(0); // Reset for new walk
+    setDistanceKm(0); 
     setLastPoint(null);
   };
   
@@ -67,7 +118,6 @@ export function useGeolocation() {
     setIsTracking(false);
   };
 
-  // Convert distance to steps (rough estimate: 1 km = 1300 steps)
   const steps = Math.floor(distanceKm * 1300);
 
   return { location, isTracking, distanceKm, steps, error, startTracking, stopTracking };

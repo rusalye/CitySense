@@ -15,6 +15,7 @@ export default function MapPage() {
   const { location, startTracking } = useGeolocation();
   const [env, setEnv] = useState({ temperature: 24, aqi: 50, aqi_grade: 'A+' });
   const [zones, setZones] = useState([]);
+  const [activeMobileTab, setActiveMobileTab] = useState('places'); // 'places' or 'profile'
 
   // Frontend Filtering System
   const AVAILABLE_FILTERS = React.useMemo(() => [
@@ -307,8 +308,14 @@ export default function MapPage() {
   return (
     <div className="page active map-container-grid" id="page-map" style={{ '--right-panel-width': `${rightPanelWidth}px` }}>
       
+      {/* MOBILE TABS (only visible on mobile via CSS) */}
+      <div className="mobile-map-tabs">
+        <div className={`mm-tab ${activeMobileTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveMobileTab('profile')}>Profile & Stats</div>
+        <div className={`mm-tab ${activeMobileTab === 'places' ? 'active' : ''}`} onClick={() => setActiveMobileTab('places')}>Nearby Places</div>
+      </div>
+
       {/* LEFT PANEL */}
-      <aside className="left-panel anim-in">
+      <aside className={`left-panel anim-in ${activeMobileTab === 'profile' ? 'mobile-active' : ''}`}>
         <div className="greeting-block">
           <div className="greeting-time-line">{timeStr}</div>
           <div className="greeting-name">
@@ -437,7 +444,7 @@ export default function MapPage() {
       </div>
       
       {/* EXTREME RIGHT PANEL: PLACES & CHAPTER */}
-      <aside className="places-panel anim-in-right" style={{ background: 'var(--bg)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' }}>
+      <aside className={`places-panel anim-in-right ${activeMobileTab === 'places' ? 'mobile-active' : ''}`} style={{ background: 'var(--bg)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' }}>
         
         {/* Resize Handle */}
         <div 

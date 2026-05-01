@@ -1,4 +1,4 @@
-const RAW_API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const RAW_API_BASE = import.meta.env.VITE_API_URL || "https://citysense-api.onrender.com";
 const API_BASE = RAW_API_BASE.replace(/\/+$/, "");
 
 export const getZones = async (chapterId = null) => {
