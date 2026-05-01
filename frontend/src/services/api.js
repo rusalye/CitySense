@@ -73,3 +73,29 @@ export const authLogin = async (email, password) => {
     }
     return res.json();
 }
+
+export const updateProfile = async (userId, data) => {
+    const res = await fetch(`${API_BASE}/users/${userId}/profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Profile update failed");
+    }
+    return res.json();
+}
+
+export const updatePassword = async (userId, current_password, new_password) => {
+    const res = await fetch(`${API_BASE}/users/${userId}/password`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ current_password, new_password }),
+    });
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Password update failed");
+    }
+    return res.json();
+}

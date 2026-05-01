@@ -331,8 +331,8 @@ export default function MapPage() {
             <div className="pm-name">{user.name}</div>
             <div className="pm-xp-row">
               <span className="pm-xp-label">Lv {user.level} · {user.rank}</span>
-              <div className="pm-xp-track"><div className="pm-xp-fill" style={{width: '68%'}}></div></div>
-              <span className="pm-xp-pct">68%</span>
+              <div className="pm-xp-track"><div className="pm-xp-fill" style={{width: `${(user.xp / (user.xpNext || 1000)) * 100}%`}}></div></div>
+              <span className="pm-xp-pct">{Math.round((user.xp / (user.xpNext || 1000)) * 100)}%</span>
             </div>
           </div>
           <span className="pm-arrow">›</span>
@@ -369,11 +369,11 @@ export default function MapPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="sec-divider"><span className="sec-icon">◈</span><span className="sec-label">Today's Journey</span><div className="sec-line"></div></div>
+        <div className="sec-divider"><span className="sec-icon">◈</span><span className="sec-label">My Journey</span><div className="sec-line"></div></div>
         <div className="stats-grid">
-          <div className="stat-tile" onClick={() => showToast('👟','12,480 steps today!')}><div className="stat-emoji">👟</div><div className="stat-num">12<sup>k</sup></div><div className="stat-lbl">Steps</div></div>
-          <div className="stat-tile" onClick={() => showToast('📍','7 places visited!')}><div className="stat-emoji">📍</div><div className="stat-num">7</div><div className="stat-lbl">Places</div></div>
-          <div className="stat-tile" onClick={() => showToast('🃏','3 new cards!')}><div className="stat-emoji">🃏</div><div className="stat-num">3</div><div className="stat-lbl">Cards</div></div>
+          <div className="stat-tile" onClick={() => showToast('👟',`${(user.daysActive || 1) * 2480} steps taken!`)}><div className="stat-emoji">👟</div><div className="stat-num">{Math.round(((user.daysActive || 1) * 2480)/1000)}<sup>k</sup></div><div className="stat-lbl">Steps</div></div>
+          <div className="stat-tile" onClick={() => showToast('📍',`${user.placesVisited || 0} places visited!`)}><div className="stat-emoji">📍</div><div className="stat-num">{user.placesVisited || 0}</div><div className="stat-lbl">Places</div></div>
+          <div className="stat-tile" onClick={() => showToast('🃏',`${user.cardsCollected || 0} cards found!`)}><div className="stat-emoji">🃏</div><div className="stat-num">{user.cardsCollected || 0}</div><div className="stat-lbl">Cards</div></div>
         </div>
 
         {/* STREET CARDS */}

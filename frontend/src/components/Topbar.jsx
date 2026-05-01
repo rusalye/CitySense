@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Topbar() {
   const { theme, toggleTheme, showToast, user, env } = useApp();
+  const navigate = useNavigate();
   const [timeStr, setTimeStr] = useState('');
 
   // Live real-time environment data
@@ -48,7 +50,7 @@ export default function Topbar() {
         <div className="icon-btn" onClick={() => showToast('🔔', '1 new challenge unlocked!')}>
           🔔<span className="notif-dot"></span>
         </div>
-        <div className="avatar-btn" onClick={() => showToast('👤', 'Profile coming soon!')}>
+        <div className="avatar-btn" onClick={() => navigate('/app/settings')}>
           {user.initial}
         </div>
       </div>

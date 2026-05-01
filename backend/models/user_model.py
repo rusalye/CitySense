@@ -13,6 +13,16 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    username: Optional[str] = None
+    age: Optional[int] = None
+    phone: Optional[str] = None
+
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
+
 class User(BaseModel):
     id: Optional[str] = None
     email: EmailStr
@@ -24,3 +34,8 @@ class User(BaseModel):
     level: int = 1
     rank: str = "Novice"
     xp: int = 0
+    xpNext: int = 1000
+    daysActive: int = 1
+    placesVisited: int = 0
+    cardsCollected: int = 0
+    challengesCompleted: int = 0

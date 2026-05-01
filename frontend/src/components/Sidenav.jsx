@@ -1,7 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
 
 export default function Sidenav() {
+  const { logout, showToast } = useApp();
+  
   return (
     <nav className="sidenav">
       <NavLink to="/app/map" className={({isActive}) => `snav-btn ${isActive ? 'active' : ''}`}>
@@ -27,9 +30,9 @@ export default function Sidenav() {
       </NavLink>
       
       <div className="snav-bottom">
-        <NavLink to="/app/settings" className={({isActive}) => `snav-btn ${isActive ? 'active' : ''}`}>
-          ⚙<span className="tip">Settings</span>
-        </NavLink>
+        <div className="snav-btn" onClick={() => { showToast('👋', 'Logged out!'); setTimeout(logout, 1000); }} style={{ cursor: 'pointer', color: 'var(--coral)' }}>
+          🚪<span className="tip">Log Out</span>
+        </div>
       </div>
     </nav>
   );

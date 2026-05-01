@@ -3,7 +3,13 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AppContext = createContext();
 
 export function AppProvider({ children }) {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState(() => {
+    // Check system preference on load
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  });
   const [toastData, setToastData] = useState({ visible: false, icon: '', message: '' });
   const [mode, setMode] = useState('calm');
   const [activeCity, setActiveCity] = useState('bengaluru');
@@ -56,10 +62,32 @@ export function AppProvider({ children }) {
     }
   }, [user]);
 
-  // Apply theme to document
+  // Apply theme to document and listen for system changes
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e) => {
+      setTheme(e.matches ? 'dark' : 'light');
+    };
+    
+    // Add listener
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+    } else {
+      mediaQuery.addListener(handleChange); // Fallback for older browsers
+    }
+    
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
 
   const toggleTheme = () => {
     setTheme(t => t === 'dark' ? 'light' : 'dark');
@@ -72,6 +100,11 @@ export function AppProvider({ children }) {
     }, 2600);
   };
 
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('citysense_user');
+  };
+
   return (
     <AppContext.Provider value={{
       theme, toggleTheme,
@@ -80,7 +113,7 @@ export function AppProvider({ children }) {
       activeCity, setActiveCity,
       activeChapter, setActiveChapter,
       selectedZone, setSelectedZone,
-      user, setUser,
+      user, setUser, logout,
       env
     }}>
       {children}
