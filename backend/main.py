@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 import certifi
 
-from routes import users, zones, chapters, challenges, cards, journal, environment
+from routes import users, zones, chapters, challenges, cards, journal, environment, community
 
 load_dotenv()
 
@@ -38,6 +38,15 @@ app.include_router(challenges.router, prefix="/challenges", tags=["challenges"])
 app.include_router(cards.router, prefix="/cards", tags=["cards"])
 app.include_router(journal.router, prefix="/journal", tags=["journal"])
 app.include_router(environment.router, prefix="/environment", tags=["environment"])
+app.include_router(community.router, prefix="/community", tags=["community"])
+
+from fastapi.staticfiles import StaticFiles
+
+# Ensure uploads directory exists before mounting (StaticFiles crashes if missing)
+os.makedirs("uploads", exist_ok=True)
+
+# Serve uploaded files
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")
 async def root():

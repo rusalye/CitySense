@@ -19,6 +19,9 @@ export default function Sidenav() {
       <NavLink to="/app/challenges" className={({isActive}) => `snav-btn ${isActive ? 'active' : ''}`}>
         🏆<span className="tip">Challenges</span>
       </NavLink>
+      <NavLink to="/app/community" className={({isActive}) => `snav-btn ${isActive ? 'active' : ''}`}>
+        💬<span className="tip">Community</span>
+      </NavLink>
       
       <div className="snav-sep"></div>
       

@@ -101,7 +101,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 .content-area{display:grid;grid-template-columns:360px 1fr;overflow:hidden;position:relative;}
 
 /* pages hide/show */
-.page{display:none;grid-column:1/-1;grid-template-columns:360px 1fr;height:calc(100dvh - 58px);}
+.page{display:none;grid-column:1/-1;grid-template-columns:360px 1fr;min-height:calc(100dvh - 58px);overflow-y:auto;}
 .page.active{display:grid;}
 /* pages with only right panel (no sidebar content) */
 .page.full-right{grid-template-columns:1fr;}
@@ -251,7 +251,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 /* ══════════════════════════════════════════
    RIGHT PANEL
 ══════════════════════════════════════════ */
-.right-panel{position:relative;overflow:hidden;}
+.right-panel{position:relative;overflow-y:auto;overflow-x:hidden;}
 
 /* ──── MAP (right panel) ──── */
 #map{width:100%;height:100%;}
