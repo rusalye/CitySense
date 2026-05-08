@@ -7,6 +7,7 @@ import JournalPage from './pages/JournalPage';
 import ChallengesPage from './pages/ChallengesPage';
 import CardsPage from './pages/CardsPage';
 import ChaptersPage from './pages/ChaptersPage';
+import CommunityPage from './pages/CommunityPage';
 import SettingsPage from './pages/SettingsPage';
 import { AppProvider, useApp } from './context/AppContext';
 
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="explore" element={<ExplorePage />} />
             <Route path="journal" element={<JournalPage />} />
             <Route path="challenges" element={<ChallengesPage />} />
+            <Route path="community" element={<CommunityPage />} />
             <Route path="cards" element={<CardsPage />} />
             <Route path="chapters" element={<ChaptersPage />} />
             <Route path="settings" element={<SettingsPage />} />
