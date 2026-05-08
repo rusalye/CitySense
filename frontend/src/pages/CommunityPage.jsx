@@ -327,21 +327,23 @@ function CommunityPage() {
 
         {/* Chapter Selector */}
         <div className="sec-divider"><span className="sec-icon">📍</span><span className="sec-label">Select Chapter</span><div className="sec-line"></div></div>
-        <div className="comm-chapter-list">
-          {chapters.map((chapter) => (
-            <div
-              key={chapter.id}
-              className={`comm-chapter-pill ${selectedChapter === chapter.id ? 'selected' : ''}`}
-              onClick={() => setSelectedChapter(chapter.id)}
-            >
-              <span className="comm-ch-emoji">{chapter.emoji}</span>
-              <div className="comm-ch-info">
-                <div className="comm-ch-name">{chapter.area}</div>
-                <div className="comm-ch-meta">{chapter.num} · {chapter.city}</div>
+        <div className="comm-chapter-wrapper">
+          <div className="comm-chapter-list">
+            {chapters.map((chapter) => (
+              <div
+                key={chapter.id}
+                className={`comm-chapter-pill ${selectedChapter === chapter.id ? 'selected' : ''}`}
+                onClick={() => setSelectedChapter(chapter.id)}
+              >
+                <span className="comm-ch-emoji">{chapter.emoji}</span>
+                <div className="comm-ch-info">
+                  <div className="comm-ch-name">{chapter.area}</div>
+                  <div className="comm-ch-meta">{chapter.num} · {chapter.city}</div>
+                </div>
+                {selectedChapter === chapter.id && <span className="comm-ch-active">●</span>}
               </div>
-              {selectedChapter === chapter.id && <span className="comm-ch-active">●</span>}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Compose shortcut */}

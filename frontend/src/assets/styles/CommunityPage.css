@@ -131,13 +131,15 @@
   justify-content: space-between;
   margin-top: 12px;
   gap: 10px;
+  flex-wrap: wrap;
 }
 .comm-action-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
+  flex-wrap: wrap;
 }
 .comm-action-chip {
   display: flex;
@@ -152,6 +154,7 @@
   cursor: pointer;
   transition: all .2s;
   white-space: nowrap;
+  flex: 0 1 auto;
 }
 .comm-action-chip:hover { border-color: var(--border2); color: var(--text); }
 .comm-inline-input {
@@ -372,13 +375,22 @@
 }
 
 /* ── LEFT PANEL: CHAPTER SELECTOR ── */
+.comm-chapter-wrapper {
+  flex: 1 1 150px;
+  min-height: 120px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .comm-chapter-list {
   padding: 0 16px 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 220px;
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
   scrollbar-width: thin;
   scrollbar-color: var(--bg3) transparent;
 }
@@ -492,7 +504,8 @@
   .comm-hero-text h2 { font-size: 22px; }
 
   .comm-compose-card { padding: 14px 16px; }
-  .comm-compose-actions { flex-direction: column; align-items: stretch; }
+  .comm-compose-actions { flex-direction: column; align-items: stretch; gap: 8px; }
+  .comm-action-row { flex-basis: 100%; }
   .comm-publish-btn { width: 100%; justify-content: center; }
 
   .comm-post-header { padding: 12px 16px; }

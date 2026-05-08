@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { getJournal } from '../services/api';
+import { getJournal, createJournal } from '../services/api';
 import { useGeolocation } from '../hooks/useGeolocation';
 
 export default function JournalPage() {
   const { showToast } = useApp();
   const [journalData, setJournalData] = useState([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    title: '',
+    body: '',
+    tags: '',
+    mood: '😊',
+    moodColor: 'var(--gold)',
+  });
   const { isTracking, startTracking, stopTracking, distanceKm, steps } = useGeolocation();
 
   useEffect(() => {
@@ -24,6 +35,82 @@ export default function JournalPage() {
     const interval = setInterval(updateTime, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    for (const file of files) {
+      if (uploadedImages.length >= 5) {
+        showToast('⚠️', 'Maximum 5 images per entry');
+        break;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUploadedImages(prev => [...prev, {
+          name: file.name,
+          data: event.target.result,
+          file: file
+        }]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = (index) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmitEntry = async () => {
+    if (!formData.title.trim()) {
+      showToast('✏️', 'Please add an entry title');
+      return;
+    }
+
+    if (!formData.body.trim()) {
+      showToast('📝', 'Please add entry content');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const tags = formData.tags.split(',').map(t => t.trim()).filter(t => t);
+      
+      const entryData = {
+        date: formData.date,
+        title: formData.title,
+        body: formData.body,
+        tags: tags.length > 0 ? tags : ['memory'],
+        steps: steps.toString(),
+        duration: isTracking ? distanceKm.toFixed(2) + ' km' : '0 km',
+        mood: formData.mood,
+        moodColor: formData.moodColor,
+        images: uploadedImages.map(img => img.data),
+      };
+
+      const newEntry = await createJournal(entryData);
+      setJournalData(prev => [newEntry, ...prev]);
+      setShowAddModal(false);
+      resetForm();
+      showToast('📖', 'Memory captured! ✨');
+    } catch (error) {
+      console.error('Error creating entry:', error);
+      showToast('❌', 'Failed to create entry');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      date: new Date().toISOString().split('T')[0],
+      title: '',
+      body: '',
+      tags: '',
+      mood: '😊',
+      moodColor: 'var(--gold)',
+    });
+    setUploadedImages([]);
+  };
 
   return (
     <div className="page active" id="page-journal" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>
@@ -55,15 +142,20 @@ export default function JournalPage() {
       <div className="right-panel journal-right">
         <div className="journal-header">
           <div className="section-h">Walking <em>Stories</em></div>
-          {isTracking ? (
-              <button className="add-btn" style={{background: 'var(--card)', color: 'var(--red)', border: '1px solid var(--red)'}} onClick={() => { stopTracking(); showToast('🛑', `Walk ended. ${steps} steps logged!`); }}>■ End Walk ({distanceKm.toFixed(2)}km)</button>
-          ) : (
-              <button className="add-btn" onClick={() => { startTracking(); showToast('👟','Walk started. Tracking live steps!'); }}>▶ Start Walk</button>
-          )}
+          <button className="add-btn" onClick={() => setShowAddModal(true)}>✏️ Add Entry</button>
         </div>
         <div className="journal-timeline anim-in">
           {journalData.map((j, i) => (
             <div key={i} className="journal-entry" onClick={() => showToast('📖','Opening entry...')}>
+              {j.images && j.images.length > 0 && (
+                <div className="je-images">
+                  {j.images.map((img, idx) => (
+                    <div key={idx} className="je-image-container">
+                      <img src={img} alt={`Memory ${idx + 1}`} className="je-image" />
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="je-date">
                 {j.date}
                 <span className={`badge badge-${j.moodColor === 'var(--teal)' ? 'teal' : j.moodColor === 'var(--gold)' ? 'gold' : 'plum'}`}>
@@ -85,6 +177,123 @@ export default function JournalPage() {
           ))}
         </div>
       </div>
+
+      {showAddModal && (
+        <div className="je-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="je-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="je-modal-header">
+              <h2>📝 New Memory</h2>
+              <button className="je-modal-close" onClick={() => setShowAddModal(false)}>✕</button>
+            </div>
+            
+            <div className="je-modal-content">
+              <div className="je-form-group">
+                <label>Date</label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({...formData, date: e.target.value})}
+                  className="je-input"
+                />
+              </div>
+
+              <div className="je-form-group">
+                <label>Title</label>
+                <input
+                  type="text"
+                  placeholder="Give this memory a name..."
+                  value={formData.title}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  className="je-input"
+                />
+              </div>
+
+              <div className="je-form-group">
+                <label>Story</label>
+                <textarea
+                  placeholder="What made this moment special?"
+                  value={formData.body}
+                  onChange={(e) => setFormData({...formData, body: e.target.value})}
+                  className="je-textarea"
+                  rows="5"
+                />
+              </div>
+
+              <div className="je-form-group">
+                <label>Mood</label>
+                <div className="je-mood-selector">
+                  {['😊', '😌', '🤩', '☕', '😍', '🎉'].map(mood => (
+                    <button
+                      key={mood}
+                      className={`je-mood-btn ${formData.mood === mood ? 'active' : ''}`}
+                      onClick={() => setFormData({...formData, mood})}
+                    >
+                      {mood}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="je-form-group">
+                <label>Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. peaceful, discovery, sunset"
+                  value={formData.tags}
+                  onChange={(e) => setFormData({...formData, tags: e.target.value})}
+                  className="je-input"
+                />
+              </div>
+
+              <div className="je-form-group">
+                <label>Memory Photos</label>
+                <label className="je-upload-btn">
+                  📸 Add Photos ({uploadedImages.length}/5)
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{display: 'none'}}
+                  />
+                </label>
+                
+                {uploadedImages.length > 0 && (
+                  <div className="je-image-previews">
+                    {uploadedImages.map((img, idx) => (
+                      <div key={idx} className="je-preview-item">
+                        <img src={img.data} alt={`Preview ${idx}`} />
+                        <button
+                          className="je-preview-remove"
+                          onClick={() => removeImage(idx)}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="je-modal-footer">
+              <button
+                className="je-btn-cancel"
+                onClick={() => setShowAddModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="je-btn-submit"
+                onClick={handleSubmitEntry}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? '⏳ Saving...' : '💾 Save Memory'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

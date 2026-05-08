@@ -4,7 +4,7 @@ import { getCards, getZones } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function CardsPage() {
-  const { showToast, setActiveChapter, setSelectedZone } = useApp();
+  const { showToast, setActiveChapter, setSelectedZone, user } = useApp();
   const navigate = useNavigate();
   const [filterMode, setFilterMode] = useState('all');
   const [cardsData, setCardsData] = useState([]);
@@ -13,8 +13,8 @@ export default function CardsPage() {
 
   useEffect(() => {
     getCards().then(setCardsData).catch(console.error);
-    getZones().then(setZonesData).catch(console.error);
-  }, []);
+    getZones(null, null, user?.age_group).then(setZonesData).catch(console.error);
+  }, [user?.age_group]);
 
   const [timeStr, setTimeStr] = useState('');
   useEffect(() => {

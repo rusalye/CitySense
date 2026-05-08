@@ -4,16 +4,19 @@ import { getZones, getEnvironment } from '../services/api';
 import { useGeolocation } from '../hooks/useGeolocation';
 
 export default function ExplorePage() {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
   const [filterMode, setFilterMode] = useState('all');
   const [zones, setZones] = useState([]);
   const [env, setEnv] = useState({ temperature: 24, aqi_grade: 'A+', weather_code: 0 });
   const { location, startTracking } = useGeolocation();
 
   useEffect(() => {
-    getZones().then(setZones).catch(console.error);
+    // Fetch zones with optional age_group filtering
+    getZones(null, filterMode === 'all' ? null : filterMode, user?.age_group)
+      .then(setZones)
+      .catch(console.error);
     startTracking();
-  }, []);
+  }, [filterMode, user?.age_group]);
 
   useEffect(() => {
     if (location) {
@@ -94,7 +97,10 @@ export default function ExplorePage() {
           </div>
         </div>
 
-        <div className="section-h">Featured <em>Discoveries</em></div>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+          <div className="section-h" style={{margin: 0}}>Featured <em>Discoveries</em></div>
+          {user && <span style={{fontSize: '11px', color: 'var(--text2)', fontStyle: 'italic'}}>Recommended for you</span>}
+        </div>
         <div className="discovery-grid anim-in">
           {displayedDiscoveries.map((d, i) => (
             <div key={i} className="discovery-card" onClick={() => showToast(d.emoji, `${d.title} — navigating!`)}>

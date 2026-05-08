@@ -11,3 +11,4 @@ class JournalEntry(BaseModel):
     duration: str
     mood: str
     moodColor: str
+    images: Optional[List[str]] = None  # List of image URLs/paths

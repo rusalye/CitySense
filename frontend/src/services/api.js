@@ -1,8 +1,13 @@
 const RAW_API_BASE = import.meta.env.VITE_API_URL || "https://citysense-api.onrender.com";
 const API_BASE = RAW_API_BASE.replace(/\/+$/, "");
 
-export const getZones = async (chapterId = null) => {
-  const url = chapterId ? `${API_BASE}/zones?chapter_id=${chapterId}` : `${API_BASE}/zones`;
+export const getZones = async (chapterId = null, mode = null, ageGroup = null) => {
+  let url = `${API_BASE}/zones`;
+  const params = [];
+  if (chapterId) params.push(`chapter_id=${chapterId}`);
+  if (mode) params.push(`mode=${mode}`);
+  if (ageGroup) params.push(`age_group=${ageGroup}`);
+  if (params.length) url += '?' + params.join('&');
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch zones");
   return res.json();

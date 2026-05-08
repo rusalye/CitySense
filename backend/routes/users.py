@@ -10,6 +10,15 @@ def get_db(request: Request):
 def hash_pass(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
+def get_age_group(age: int) -> str:
+    """Determine age group from numeric age"""
+    if age < 18:
+        return "teen"
+    elif age < 60:
+        return "adult"
+    else:
+        return "senior"
+
 @router.post("/register", response_model=User)
 async def register(user: UserCreate, request: Request):
     db = get_db(request)
@@ -23,6 +32,7 @@ async def register(user: UserCreate, request: Request):
         "name": user.name,
         "username": user.username,
         "age": user.age,
+        "age_group": get_age_group(user.age),
         "phone": user.phone,
         "initial": user.name[0].upper() if user.name else "V",
         "level": 1,
@@ -48,6 +58,10 @@ async def login(user: UserLogin, request: Request):
     if existing["password_hash"] != hash_pass(user.password):
         raise HTTPException(status_code=400, detail="Invalid email or password")
     
+    # Ensure age_group is set (for backward compatibility)
+    if "age" in existing and "age_group" not in existing:
+        existing["age_group"] = get_age_group(existing["age"])
+    
     existing["id"] = str(existing["_id"])
     return existing
 
@@ -65,6 +79,10 @@ async def update_profile(user_id: str, update_data: UserUpdate, request: Request
     
     if "name" in update_dict and update_dict["name"]:
         update_dict["initial"] = update_dict["name"][0].upper()
+    
+    # Auto-calculate age_group if age is being updated
+    if "age" in update_dict:
+        update_dict["age_group"] = get_age_group(update_dict["age"])
         
     if not update_dict:
         raise HTTPException(status_code=400, detail="No fields to update")
