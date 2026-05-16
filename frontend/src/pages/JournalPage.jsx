@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { getJournal, createJournal } from '../services/api';
+import { getJournal, createJournal, deleteJournal } from '../services/api';
 import { useGeolocation } from '../hooks/useGeolocation';
 
 export default function JournalPage() {
   const { showToast } = useApp();
   const [journalData, setJournalData] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     title: '',
@@ -100,6 +104,30 @@ export default function JournalPage() {
     }
   };
 
+  const handleDeleteEntry = async () => {
+    if (!selectedEntry) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteJournal(selectedEntry.id);
+      setJournalData(prev => prev.filter(j => j.id !== selectedEntry.id));
+      setShowDetailModal(false);
+      setSelectedEntry(null);
+      setShowDeleteConfirm(false);
+      showToast('🗑️', 'Memory deleted');
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      showToast('❌', 'Failed to delete entry');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const openDetailModal = (entry) => {
+    setSelectedEntry(entry);
+    setShowDetailModal(true);
+  };
+
   const resetForm = () => {
     setFormData({
       date: new Date().toISOString().split('T')[0],
@@ -146,7 +174,7 @@ export default function JournalPage() {
         </div>
         <div className="journal-timeline anim-in">
           {journalData.map((j, i) => (
-            <div key={i} className="journal-entry" onClick={() => showToast('📖','Opening entry...')}>
+            <div key={i} className="journal-entry" onClick={() => openDetailModal(j)}>
               {j.images && j.images.length > 0 && (
                 <div className="je-images">
                   {j.images.map((img, idx) => (
@@ -177,6 +205,99 @@ export default function JournalPage() {
           ))}
         </div>
       </div>
+
+      {showDetailModal && selectedEntry && (
+        <div className="je-modal-overlay" onClick={() => setShowDetailModal(false)}>
+          <div className="je-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="je-modal-header">
+              <h2>📖 Memory</h2>
+              <button className="je-modal-close" onClick={() => setShowDetailModal(false)}>✕</button>
+            </div>
+            
+            <div className="je-detail-content">
+              {selectedEntry.images && selectedEntry.images.length > 0 && (
+                <div className="jed-images-container">
+                  {selectedEntry.images.length === 1 ? (
+                    <div className="jed-single-image">
+                      <img src={selectedEntry.images[0]} alt="Memory" className="jed-image" />
+                    </div>
+                  ) : (
+                    <div className="jed-gallery">
+                      {selectedEntry.images.map((img, idx) => (
+                        <div key={idx} className="jed-gallery-item">
+                          <img src={img} alt={`Memory ${idx + 1}`} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <div className="jed-content">
+                <div className="jed-date">{selectedEntry.date}</div>
+                <h1 className="jed-title" dangerouslySetInnerHTML={{__html: selectedEntry.title}} />
+                <div className="jed-body">{selectedEntry.body}</div>
+                
+                <div className="jed-meta">
+                  <div className="jed-mood-display">{selectedEntry.mood}</div>
+                  <div className="jed-tags">
+                    {selectedEntry.tags.map(t => <span key={t} className="badge badge-sky">{t}</span>)}
+                  </div>
+                </div>
+                
+                <div className="jed-stats-detail">
+                  <div className="jed-stat-item"><span>👟</span> <strong>{selectedEntry.steps}</strong> steps</div>
+                  <div className="jed-stat-item"><span>⏱</span> <strong>{selectedEntry.duration}</strong></div>
+                  <div className="jed-stat-item"><span>📍</span> <strong>Bengaluru</strong></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="je-detail-footer">
+              <button 
+                className="jed-btn-delete"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                🗑️ Delete
+              </button>
+              <button 
+                className="je-btn-close-detail"
+                onClick={() => setShowDetailModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && selectedEntry && (
+        <div className="je-modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="je-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-header">
+              <h3>Delete Memory?</h3>
+            </div>
+            <div className="confirm-body">
+              <p>Are you sure you want to delete <strong>"{selectedEntry.title}"</strong>? This action cannot be undone.</p>
+            </div>
+            <div className="confirm-footer">
+              <button 
+                className="confirm-cancel"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="confirm-delete"
+                onClick={handleDeleteEntry}
+                disabled={isDeleting}
+              >
+                {isDeleting ? '⏳ Deleting...' : '🗑️ Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showAddModal && (
         <div className="je-modal-overlay" onClick={() => setShowAddModal(false)}>

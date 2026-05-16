@@ -3,6 +3,7 @@ from typing import List, Optional
 from models.journal_model import JournalEntry
 import os
 from datetime import datetime
+from bson import ObjectId
 
 router = APIRouter()
 
@@ -52,5 +53,17 @@ async def upload_image(file: UploadFile = File(...)):
         
         # Return the relative path to store in database
         return {"success": True, "imagePath": filepath}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@router.delete("/{entry_id}")
+async def delete_journal(entry_id: str, request: Request):
+    """Delete a journal entry by ID"""
+    db = get_db(request)
+    try:
+        result = await db.journals.delete_one({"_id": ObjectId(entry_id)})
+        if result.deleted_count == 0:
+            return {"success": False, "error": "Entry not found"}
+        return {"success": True, "message": "Entry deleted successfully"}
     except Exception as e:
         return {"success": False, "error": str(e)}

@@ -41,6 +41,15 @@ export const createJournal = async (entry) => {
     return res.json();
 }
 
+export const deleteJournal = async (entryId) => {
+    const res = await fetch(`${API_BASE}/journal/${entryId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) throw new Error("Failed to delete journal entry");
+    return res.json();
+}
+
 export const getChallenges = async () => {
     const res = await fetch(`${API_BASE}/challenges`);
     if (!res.ok) throw new Error("Failed to fetch challenges");
