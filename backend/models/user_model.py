@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List, Dict
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -19,6 +19,13 @@ class UserUpdate(BaseModel):
     age: Optional[int] = None
     age_group: Optional[str] = None  # "teen", "adult", "senior"
     phone: Optional[str] = None
+    xp: Optional[int] = None
+    placesVisited: Optional[int] = None
+    cardsCollected: Optional[int] = None
+    challengesCompleted: Optional[int] = None
+    badges: Optional[List[str]] = None
+    challengeProgress: Optional[Dict[str, int]] = None
+    chapterProgress: Optional[Dict[str, int]] = None
 
 class PasswordUpdate(BaseModel):
     current_password: str
@@ -41,3 +48,6 @@ class User(BaseModel):
     placesVisited: int = 0
     cardsCollected: int = 0
     challengesCompleted: int = 0
+    badges: List[str] = []
+    challengeProgress: Dict[str, int] = {}
+    chapterProgress: Dict[str, int] = {}

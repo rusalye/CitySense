@@ -5,7 +5,7 @@ import { updateProfile, updatePassword } from '../services/api';
 
 export default function SettingsPage() {
   const { user, setUser, theme, setTheme, mode, setMode, showToast, logout } = useApp();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isChangePassOpen, setIsChangePassOpen] = useState(false);

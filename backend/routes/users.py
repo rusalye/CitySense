@@ -42,7 +42,10 @@ async def register(user: UserCreate, request: Request):
         "daysActive": 1,
         "placesVisited": 0,
         "cardsCollected": 0,
-        "challengesCompleted": 0
+        "challengesCompleted": 0,
+        "badges": [],
+        "challengeProgress": {},
+        "chapterProgress": {}
     }
     result = await db.users.insert_one(new_user)
     new_user["id"] = str(result.inserted_id)
@@ -61,6 +64,12 @@ async def login(user: UserLogin, request: Request):
     # Ensure age_group is set (for backward compatibility)
     if "age" in existing and "age_group" not in existing:
         existing["age_group"] = get_age_group(existing["age"])
+    if "badges" not in existing:
+        existing["badges"] = []
+    if "challengeProgress" not in existing:
+        existing["challengeProgress"] = {}
+    if "chapterProgress" not in existing:
+        existing["chapterProgress"] = {}
     
     existing["id"] = str(existing["_id"])
     return existing

@@ -493,7 +493,12 @@ def fetch_osm_places(chapter_id, lat, lng):
 FALLBACK_ZONES_DATA = [
   {"id":"z1", "emoji":'🌳', "title":'Cubbon Park', "sub":'A lush 300-acre park in the heart of the city.', "dist":'150m', "rating":'4.8', "mode":'calm', "bg":'calm-bg', "badge":'teal', "badgeTxt":'Calm', "lat":12.9766, "lng":77.5993, "type":"discover", "color":"#5eb88a", "chapter_id": "mgroad", "card_name": "Green Path", "image_url": UNSPLASH_PARKS[0], "description": "A serene green space providing a quiet escape.", "age_preferences": {"teen": 70, "adult": 75, "senior": 95}, "popularity_score": 58, "quality_score": 85, "experience_tags": ["quiet", "scenic", "walkable", "accessible"]},
   {"id":"z3", "emoji":'🎨', "title":'Pottery Lane', "sub":'A narrow street lined with artisans.', "dist":'0.8km', "rating":'4.9', "mode":'explore', "bg":'explore-bg', "badge":'plum', "badgeTxt":'Explore', "lat":12.9719, "lng":77.6112, "type":"discover", "color":"#9b6bbf", "chapter_id": "indiranagar", "card_name": "Heritage Walk", "image_url": UNSPLASH_HERITAGE[0], "description": "A cultural zone full of history and local art.", "age_preferences": {"teen": 90, "adult": 78, "senior": 65}, "popularity_score": 52, "quality_score": 82, "experience_tags": ["scenic", "cultural", "walkable", "youthful"]},
-  {"id":"z4", "emoji":'🍵', "title":"Koshy's Café", "sub":"Bengaluru's oldest café.", "dist":'680m', "rating":'4.7', "mode":'comfort', "bg":'comfort-bg', "badge":'gold', "badgeTxt":'Iconic', "lat":12.9672, "lng":77.5921, "type":"popular", "color":"#d4a84b", "chapter_id": "mgroad", "card_name": "The Cosy Corner", "image_url": UNSPLASH_CAFES[1], "description": "An iconic space bustling with intellectuals.", "age_preferences": {"teen": 75, "adult": 85, "senior": 70}, "popularity_score": 80, "quality_score": 88, "experience_tags": ["cozy", "social", "work-friendly", "youthful"]}
+  {"id":"z4", "emoji":'🍵', "title":"Koshy's Café", "sub":"Bengaluru's oldest café.", "dist":'680m', "rating":'4.7', "mode":'comfort', "bg":'comfort-bg', "badge":'gold', "badgeTxt":'Iconic', "lat":12.9672, "lng":77.5921, "type":"popular", "color":"#d4a84b", "chapter_id": "mgroad", "card_name": "The Cosy Corner", "image_url": UNSPLASH_CAFES[1], "description": "An iconic space bustling with intellectuals.", "age_preferences": {"teen": 75, "adult": 85, "senior": 70}, "popularity_score": 80, "quality_score": 88, "experience_tags": ["cozy", "social", "work-friendly", "youthful"]},
+  {"id":"am1", "emoji":'☕', "title":'Kafetoz Kasavanahalli', "sub":'A perfect spot for a quick coffee.', "dist":'150m', "rating":'4.5', "mode":'comfort', "bg":'comfort-bg', "badge":'gold', "badgeTxt":'Comfort', "lat":12.894327531892325, "lng":77.67767429351208, "type":"popular", "color":"#d4a84b", "chapter_id": "amrita", "card_name": "The Cosy Corner", "image_url": UNSPLASH_CAFES[0], "description": "Great coffee near the campus.", "age_preferences": {"teen": 90, "adult": 85, "senior": 50}, "popularity_score": 75, "quality_score": 85, "experience_tags": ["cozy", "social", "youthful"]},
+  {"id":"am2", "emoji":'🧁', "title":'Mighty Paws Cafe and Bakery', "sub":'Fresh bakes and hot beverages.', "dist":'800m', "rating":'4.6', "mode":'comfort', "bg":'comfort-bg', "badge":'gold', "badgeTxt":'Comfort', "lat":12.902367866869678, "lng":77.67719470236682, "type":"popular", "color":"#d4a84b", "chapter_id": "amrita", "card_name": "Dawn Walker", "image_url": UNSPLASH_CAFES[1], "description": "Known for delicious pastries and relaxed vibe.", "age_preferences": {"teen": 85, "adult": 80, "senior": 60}, "popularity_score": 72, "quality_score": 88, "experience_tags": ["cozy", "social", "work-friendly"]},
+  {"id":"am3", "emoji":'🌊', "title":'Kasavanahalli Lake', "sub":'A calm lakeside view.', "dist":'1.2km', "rating":'4.7', "mode":'calm', "bg":'calm-bg', "badge":'teal', "badgeTxt":'Calm', "lat":12.9042, "lng":77.6728, "type":"discover", "color":"#5eb88a", "chapter_id": "amrita", "card_name": "Lake Silence", "image_url": UNSPLASH_PARKS[1], "description": "Perfect for morning walks.", "age_preferences": {"teen": 65, "adult": 75, "senior": 90}, "popularity_score": 60, "quality_score": 80, "experience_tags": ["quiet", "scenic", "walkable", "accessible"]},
+  {"id":"am4", "emoji":'📚', "title":'Central Library Amrita', "sub":'Quiet study zones.', "dist":'50m', "rating":'4.9', "mode":'explore', "bg":'explore-bg', "badge":'plum', "badgeTxt":'Explore', "lat":12.8955, "lng":77.6752, "type":"discover", "color":"#9b6bbf", "chapter_id": "amrita", "card_name": "Hidden Alcove", "image_url": UNSPLASH_HERITAGE[1], "description": "A massive collection of books and silence.", "age_preferences": {"teen": 95, "adult": 80, "senior": 70}, "popularity_score": 50, "quality_score": 75, "experience_tags": ["quiet", "youthful", "walkable"]},
+  {"id":"am5", "emoji":'🏛', "title":'Amriteshwari Temple', "sub":'A serene spiritual center.', "dist":'100m', "rating":'4.8', "mode":'calm', "bg":'calm-bg', "badge":'teal', "badgeTxt":'Calm', "lat":12.8948, "lng":77.6760, "type":"discover", "color":"#5eb88a", "chapter_id": "amrita", "card_name": "Heritage Walk", "image_url": UNSPLASH_HERITAGE[2], "description": "Peaceful atmosphere on campus.", "age_preferences": {"teen": 60, "adult": 70, "senior": 95}, "popularity_score": 55, "quality_score": 85, "experience_tags": ["quiet", "heritage", "accessible"]}
 ]
 
 # CHALLENGES: Connects users to tasks and rewards
@@ -524,7 +529,7 @@ CITIES_DATA = [
   {
     "id":'bengaluru', "name":'Bengaluru', "country":'Karnataka, India', "emoji":'🌆',
     "tagline":'The Garden City', "color":'var(--teal)', "colorHex":'#5eb88a',
-    "userHere":True, "chaptersUnlocked":2, "chaptersTotal":3, "comingSoon": False,
+    "userHere":True, "chaptersUnlocked":3, "chaptersTotal":4, "comingSoon": False,
     "chapters":[
       {"id":'mgroad', "num":'Chapter I', "area":'MG Road / Church Street', "emoji":'🏛',
         "theme":'Heritage & Culture',
@@ -543,7 +548,13 @@ CITIES_DATA = [
         "desc":'The modern, energetic heartbeat of the city. Microbreweries, contemporary art cafes, and hidden parks blending old and new.',
         "stops":["100ft Road Cross","Toit Brewpub","Third Wave Coffee", "12th Main Murals", "Defense Colony Parks"],
         "stopsVisited":0, "stopsTotal":5, "progress":0, "color":'var(--plum2)', "colorHex":'#be96e0',
-        "status":'active', "xp":350, "card":'🌃 Night Lantern Card', "centerLat": 12.9785, "centerLng": 77.6408, "sensoryBase": {"noise": 75, "crowd": 90, "air": 70, "vibe": 95}}
+        "status":'active', "xp":350, "card":'🌃 Night Lantern Card', "centerLat": 12.9785, "centerLng": 77.6408, "sensoryBase": {"noise": 75, "crowd": 90, "air": 70, "vibe": 95}},
+      {"id":'amrita', "num":'Chapter IV', "area":'Amrita Vishwa Vidyapeetham', "emoji":'🎓',
+        "theme":'Campus Life & Nearby Spots',
+        "desc":'The energetic student campus surrounded by popular cafes, local bakeries, and serene lakes perfect for taking a break from studies.',
+        "stops":["Kafetoz Kasavanahalli", "Mighty Paws Cafe", "Kasavanahalli Lake", "Central Library", "Amriteshwari Temple"],
+        "stopsVisited":0, "stopsTotal":5, "progress":0, "color":'var(--sky)', "colorHex":'#7293d4',
+        "status":'active', "xp":400, "card":'🎓 Campus Explorer Card', "centerLat": 12.895193, "centerLng": 77.675684, "sensoryBase": {"noise": 60, "crowd": 80, "air": 65, "vibe": 90}}
     ]
   },
   {
@@ -580,19 +591,20 @@ async def seed_db():
     
     # Generate live zones per chapter
     FINAL_ZONES = []
-    targets = [("mgroad", 12.9740, 77.6010), ("malleshwaram", 13.0040, 77.5715), ("indiranagar", 12.9785, 77.6408)]
+    targets = [("mgroad", 12.9740, 77.6010), ("malleshwaram", 13.0040, 77.5715), ("indiranagar", 12.9785, 77.6408), ("amrita", 12.895193, 77.675684)]
     for cid, lat, lng in targets:
         zones = fetch_osm_places(cid, lat, lng)
+        # ALWAYS append chapter-specific fallback zones
+        chapter_fb = [z.copy() for z in FALLBACK_ZONES_DATA if z.get("chapter_id") == cid]
+        zones.extend(chapter_fb)
+        
         if len(zones) == 0:
-            print(f"Falling back to hardcoded zones for {cid}.")
-            # First try chapter-specific fallback zones
-            fb_zones = [z for z in FALLBACK_ZONES_DATA if z.get("chapter_id") == cid]
-            if len(fb_zones) == 0:
-                # Use all fallback zones to ensure we have both discover and popular types
-                fb_zones = [z.copy() for z in FALLBACK_ZONES_DATA]
-                for i, z in enumerate(fb_zones):
-                    z["id"] = f"{cid}_fallback_{i}"
-                    z["chapter_id"] = cid
+            print(f"Falling back to all hardcoded zones for {cid}.")
+            # Use all fallback zones to ensure we have both discover and popular types
+            fb_zones = [z.copy() for z in FALLBACK_ZONES_DATA]
+            for i, z in enumerate(fb_zones):
+                z["id"] = f"{cid}_fallback_{i}"
+                z["chapter_id"] = cid
             zones = fb_zones
         FINAL_ZONES.extend(zones)
         

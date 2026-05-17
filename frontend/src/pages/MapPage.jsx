@@ -3,10 +3,10 @@ import { useApp } from '../context/AppContext';
 import { MAP_STYLES } from '../data/mockData';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { getEnvironment, getZones, getChapters } from '../services/api';
-import { useGeolocation } from '../hooks/useGeolocation';
+import { useGeolocation, calculateDistance } from '../hooks/useGeolocation';
 
 export default function MapPage() {
-  const { user, mode, setMode, showToast, theme, activeChapter, setActiveChapter, selectedZone, setSelectedZone } = useApp();
+  const { user, mode, setMode, showToast, theme, activeChapter, setActiveChapter, selectedZone, setSelectedZone, visitedZones, setVisitedZones, visitPlace } = useApp();
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const dirRenderer = useRef(null);
@@ -53,7 +53,23 @@ export default function MapPage() {
 
   useEffect(() => {
     startTracking();
-  }, []);
+  }, [startTracking]);
+
+  // Location proximity check
+  useEffect(() => {
+    if (!location || !filteredZones) return;
+    
+    filteredZones.forEach(zone => {
+      if (visitedZones.includes(zone.id)) return;
+      
+      const dist = calculateDistance(location.lat, location.lng, zone.lat, zone.lng);
+      if (dist < 0.05) { // 50 meters
+        setVisitedZones(prev => [...prev, zone.id]);
+        showToast('📍', `You arrived at ${zone.title}!`);
+        visitPlace(zone);
+      }
+    });
+  }, [location, filteredZones, visitedZones, setVisitedZones, visitPlace, showToast]);
 
   // Resizable Right Panel
   const [rightPanelWidth, setRightPanelWidth] = useState(330);
@@ -105,7 +121,7 @@ export default function MapPage() {
     if (location) {
       getEnvironment(location.lat, location.lng).then(setEnv).catch(console.error);
     }
-  }, [location?.lat, location?.lng]);
+  }, [location]);
 
   // Time & Greeting
   const [timeStr, setTimeStr] = useState('');
@@ -124,17 +140,12 @@ export default function MapPage() {
   const greet = new Date().getHours() < 12 ? 'Good morning,' : new Date().getHours() < 17 ? 'Good afternoon,' : 'Good evening,';
 
   // Sensory State Simulation
-  const [sensory, setSensory] = useState({ noise: 22, crowd: 38, air: 76, vibe: 85 });
+  // const [sensory, setSensory] = useState({ noise: 22, crowd: 38, air: 76, vibe: 85 });
   useEffect(() => {
     if (!activeChapter) return;
     const base = activeChapter.sensoryBase || { noise: 50, crowd: 50, air: 50, vibe: 50 };
     const updateS = () => {
-      setSensory({ 
-        noise: Math.min(100, Math.max(0, base.noise + Math.floor(Math.random() * 10 - 5))), 
-        crowd: Math.min(100, Math.max(0, base.crowd + Math.floor(Math.random() * 8 - 4))), 
-        air: Math.min(100, Math.max(0, base.air + Math.floor(Math.random() * 12 - 6))), 
-        vibe: Math.min(100, Math.max(0, base.vibe + Math.floor(Math.random() * 5 - 2))) 
-      });
+      // setSensory(...)
     };
     updateS();
     const i = setInterval(updateS, 3500);
@@ -174,7 +185,7 @@ export default function MapPage() {
       clearInterval(checkGoogleMaps);
       mapInstance.current = null;
     };
-  }, [theme, mode]);
+  }, [theme, mode, activeChapter]);
 
   // Route Drawing Logic
   const drawRoute = (zone) => {
@@ -227,7 +238,9 @@ export default function MapPage() {
         position: { lat: p.lat, lng: p.lng }, map: mapInstance.current,
         icon: {
           path: 'M 0,-16 C -9,-16 -16,-9 -16,0 C -16,9 0,22 0,22 C 0,22 16,9 16,0 C 16,-9 9,-16 0,-16 Z',
-          fillColor: p.color, fillOpacity: .92, strokeColor: 'rgba(255,255,255,.25)', 
+          fillColor: visitedZones.includes(p.id) ? '#888888' : p.color, 
+          fillOpacity: visitedZones.includes(p.id) ? 0.6 : 0.92, 
+          strokeColor: 'rgba(255,255,255,.25)', 
           strokeWeight: 1.5, scale: 1, anchor: new window.google.maps.Point(0, 22), 
           labelOrigin: new window.google.maps.Point(0, 0)
         },
@@ -243,7 +256,7 @@ export default function MapPage() {
       m.origColor = p.color;
       markersRef.current.push(m);
     });
-  }, [filteredZones, location]);
+  }, [filteredZones, location, setSelectedZone, showToast]);
 
   // Dynamic Pin Highlighting & Zoom Scaling
   useEffect(() => {
@@ -494,16 +507,19 @@ export default function MapPage() {
              <div style={{ textAlign: 'center', color: 'var(--text3)', marginTop: '40px', fontSize: '13px' }}>
                No places found for your current vibe.
              </div>
-           ) : filteredZones.map(z => (
+           ) : filteredZones.map(z => {
+             const isVisited = visitedZones.includes(z.id);
+             return (
              <div key={z.id} onClick={() => {
                setSelectedZone(selectedZone?.id === z.id ? null : z);
                if(mapInstance.current) {
                  mapInstance.current.panTo({ lat: z.lat, lng: z.lng });
                }
              }} style={{ flexShrink: 0, width: '100%', background: 'var(--card)', borderRadius: '20px', border: selectedZone?.id === z.id ? `2px solid ${z.color}` : '1px solid var(--border)', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s', transform: selectedZone?.id === z.id ? 'translateX(-4px)' : 'none', boxShadow: selectedZone?.id === z.id ? `0 8px 24px ${z.color}33` : '0 4px 12px rgba(0,0,0,0.1)' }}>
-               <div style={{ height: '140px', width: '100%', background: `url(${z.image_url}) center/cover no-repeat`, position: 'relative' }}>
+               <div style={{ height: '140px', width: '100%', background: `url(${z.image_url}) center/cover no-repeat`, position: 'relative', filter: isVisited ? 'grayscale(80%)' : 'none' }}>
                  <div style={{ position: 'absolute', bottom: '10px', left: '10px', width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', boxShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>{z.emoji}</div>
                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '4px 8px', borderRadius: '10px', fontSize: '11px', color: '#fff', fontWeight: 600 }}>★ {z.rating}</div>
+                 {isVisited && <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'var(--teal)', color: '#fff', padding: '4px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 600 }}>✅ Visited</div>}
                </div>
                <div style={{ padding: '16px' }}>
                  <div style={{ fontWeight: 600, fontSize: '15px', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{z.title}</div>
@@ -530,7 +546,8 @@ export default function MapPage() {
                  )}
                </div>
              </div>
-           ))}
+             );
+           })}
         </div>
       </aside>
     </div>

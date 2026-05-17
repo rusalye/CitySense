@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { getChallenges } from '../services/api';
 
 export default function ChallengesPage() {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
   const [filterMode, setFilterMode] = useState('all');
   const [challengesData, setChallengesData] = useState([]);
 
@@ -39,24 +39,27 @@ export default function ChallengesPage() {
         </div>
         <div className="sec-divider"><span className="sec-icon">◈</span><span className="sec-label">Your Progress</span><div className="sec-line"></div></div>
         <div className="stats-grid">
-          <div className="stat-tile"><div className="stat-emoji">✅</div><div className="stat-num">7</div><div className="stat-lbl">Done</div></div>
-          <div className="stat-tile"><div className="stat-emoji">🔥</div><div className="stat-num">5</div><div className="stat-lbl">Streak</div></div>
-          <div className="stat-tile"><div className="stat-emoji">⭐</div><div className="stat-num">840</div><div className="stat-lbl">XP Earned</div></div>
+          <div className="stat-tile"><div className="stat-emoji">✅</div><div className="stat-num">{user?.challengesCompleted || 0}</div><div className="stat-lbl">Done</div></div>
+          <div className="stat-tile"><div className="stat-emoji">🔥</div><div className="stat-num">{user?.daysActive || 1}</div><div className="stat-lbl">Streak</div></div>
+          <div className="stat-tile"><div className="stat-emoji">⭐</div><div className="stat-num">{user?.xp || 0}</div><div className="stat-lbl">XP Earned</div></div>
         </div>
         <div className="sec-divider"><span className="sec-icon">🏅</span><span className="sec-label">Recent Badges</span><div className="sec-line"></div></div>
         <div style={{padding: '0 16px 20px', display: 'flex', gap: '12px', flexWrap: 'wrap'}}>
-          <div style={{textAlign: 'center', cursor: 'pointer'}} onClick={() => showToast('🌿','Green Walker badge earned!')}>
-            <div style={{fontSize: '32px', marginBottom: '4px'}}>🌿</div><div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em'}}>Green<br/>Walker</div>
-          </div>
-          <div style={{textAlign: 'center', cursor: 'pointer'}} onClick={() => showToast('🌅','Early Bird badge earned!')}>
-            <div style={{fontSize: '32px', marginBottom: '4px'}}>🌅</div><div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em'}}>Early<br/>Bird</div>
-          </div>
-          <div style={{textAlign: 'center', cursor: 'pointer'}} onClick={() => showToast('☕','Café Hopper badge earned!')}>
-            <div style={{fontSize: '32px', marginBottom: '4px'}}>☕</div><div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em'}}>Café<br/>Hopper</div>
-          </div>
-          <div style={{textAlign: 'center', opacity: '.4', cursor: 'pointer'}} onClick={() => showToast('🔒','Earn 5 more XP to unlock!')}>
-            <div style={{fontSize: '32px', marginBottom: '4px'}}>🔮</div><div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em'}}>Mystery<br/>Locked</div>
-          </div>
+          {user?.badges?.length > 0 ? user.badges.map(b => {
+             const emoji = b.split(' ')[0];
+             const name = b.split(' ').slice(1).join('\n');
+             return (
+               <div key={b} style={{textAlign: 'center', cursor: 'pointer'}} onClick={() => showToast(emoji, `${b} badge earned!`)}>
+                 <div style={{fontSize: '32px', marginBottom: '4px'}}>{emoji}</div>
+                 <div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em', whiteSpace: 'pre-line'}}>{name}</div>
+               </div>
+             );
+          }) : (
+             <div style={{textAlign: 'center', opacity: '.4', width: '100%'}}>
+               <div style={{fontSize: '32px', marginBottom: '4px'}}>🔒</div>
+               <div style={{fontSize: '9px', fontFamily: 'Courier Prime,monospace', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '.06em'}}>No Badges<br/>Yet</div>
+             </div>
+          )}
         </div>
       </aside>
 
@@ -77,8 +80,9 @@ export default function ChallengesPage() {
         </div>
         <div className="challenges-grid anim-in">
           {data.map(ch => {
-            const pct = Math.round((ch.progress/ch.total)*100);
-            const done = ch.progress >= ch.total;
+            const userProg = user?.challengeProgress?.[ch.id] !== undefined ? user.challengeProgress[ch.id] : ch.progress;
+            const pct = Math.round((userProg/ch.total)*100);
+            const done = userProg >= ch.total;
             return (
               <div key={ch.id} className={`challenge-card ${done ? 'completed' : ''}`} onClick={() => showToast(ch.icon, ch.title)}>
                 <div className="cc-top">
@@ -94,7 +98,7 @@ export default function ChallengesPage() {
                   <div className="cc-prog-track">
                     <div className="cc-prog-fill" style={{width: `${pct}%`, background: ch.color}}></div>
                   </div>
-                  <div className="cc-prog-lbl">{ch.progress} / {ch.total}{done && ' · Done'}</div>
+                  <div className="cc-prog-lbl">{userProg} / {ch.total}{done && ' · Done'}</div>
                 </div>
               </div>
             );

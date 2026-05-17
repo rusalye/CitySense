@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 import { getChapters } from '../services/api';
 
 export default function ChaptersPage() {
-  const { showToast, setActiveChapter } = useApp();
+  const { showToast, setActiveChapter, user } = useApp();
   const navigate = useNavigate();
   const [activeCityId, setActiveCityId] = useState('bengaluru');
   const [citiesData, setCitiesData] = useState([]);
@@ -147,15 +147,26 @@ export default function ChaptersPage() {
                             <div className="ci-desc">{ch.desc}</div>
                             <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px'}}>
                               <div className="ci-stops-row">
-                                {ch.stops.slice(0,3).map((s, i) => (
-                                  <span key={i} className={`ci-stop ${i < ch.stopsVisited ? 'visited' : ''}`}>{i < ch.stopsVisited ? '✓' : String(i+1)}</span>
-                                ))}
+                                {ch.stops.slice(0,3).map((s, i) => {
+                                  const cProg = user?.chapterProgress?.[ch.id] !== undefined ? user.chapterProgress[ch.id] : ch.stopsVisited;
+                                  return (
+                                    <span key={i} className={`ci-stop ${i < cProg ? 'visited' : ''}`}>{i < cProg ? '✓' : String(i+1)}</span>
+                                  );
+                                })}
                                 <span style={{fontSize: '10px', color: 'var(--text3)', fontFamily: "'Courier Prime',monospace"}}> +{ch.stopsTotal-3} more</span>
                               </div>
                             </div>
                             <div className="ci-progress" style={{marginTop: '8px'}}>
-                              <div className="ci-track"><div className="ci-fill" style={{width: `${ch.progress}%`, background: ch.colorHex}}></div></div>
-                              <div className="ci-pct">{ch.progress + '%'}</div>
+                              {(() => {
+                                const cProg = user?.chapterProgress?.[ch.id] !== undefined ? user.chapterProgress[ch.id] : ch.stopsVisited;
+                                const pct = Math.round((cProg / ch.stopsTotal) * 100);
+                                return (
+                                  <>
+                                    <div className="ci-track"><div className="ci-fill" style={{width: `${pct}%`, background: ch.colorHex}}></div></div>
+                                    <div className="ci-pct">{pct + '%'}</div>
+                                  </>
+                                );
+                              })()}
                             </div>
                             <div className="ci-reward">🎁 {ch.xp} XP · {ch.card}</div>
                           </div>
