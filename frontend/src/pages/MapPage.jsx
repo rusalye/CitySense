@@ -180,7 +180,7 @@ export default function MapPage() {
           polylineOptions: { strokeColor: '#5eb88a', strokeOpacity: 0.8, strokeWeight: 5 }
         });
       }
-    }, 500);
+    }, 100);
     return () => {
       clearInterval(checkGoogleMaps);
       mapInstance.current = null;
