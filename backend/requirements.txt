@@ -5,3 +5,4 @@ python-dotenv
 certifi
 httpx
 pydantic[email]
+python-multipart
