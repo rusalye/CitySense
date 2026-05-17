@@ -90,9 +90,9 @@ export default function MapPage() {
 
   useEffect(() => {
     if (activeChapter) {
-      getZones(activeChapter.id).then(setZones).catch(console.error);
+      getZones(activeChapter.id, mode, user?.age_group).then(setZones).catch(console.error);
     }
-  }, [activeChapter]);
+  }, [activeChapter, mode, user?.age_group]);
 
   useEffect(() => {
     if (mapInstance.current && activeChapter && window.google) {

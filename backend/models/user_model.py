@@ -17,6 +17,7 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     username: Optional[str] = None
     age: Optional[int] = None
+    age_group: Optional[str] = None  # "teen", "adult", "senior"
     phone: Optional[str] = None
 
 class PasswordUpdate(BaseModel):
@@ -29,6 +30,7 @@ class User(BaseModel):
     name: str = "New Voyager"
     username: str = "voyager"
     age: Optional[int] = None
+    age_group: Optional[str] = None  # "teen", "adult", "senior"
     phone: Optional[str] = None
     initial: str = "V"
     level: int = 1

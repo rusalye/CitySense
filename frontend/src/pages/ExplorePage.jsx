@@ -3,17 +3,52 @@ import { useApp } from '../context/AppContext';
 import { getZones, getEnvironment } from '../services/api';
 import { useGeolocation } from '../hooks/useGeolocation';
 
+// Mode configuration for dynamic hero section
+const MODE_CONFIG = {
+  calm: {
+    emoji: '🌿',
+    name: 'Calm',
+    description: 'serene parks and quiet streets',
+    heroSubtitle: 'Curated peaceful discoveries based on your Calm mode, time of day, and walking distance.',
+    badgeColor: 'badge-teal',
+  },
+  comfort: {
+    emoji: '☕',
+    name: 'Comfort',
+    description: 'cosy cafés and restful spaces',
+    heroSubtitle: 'Curated comfort spots based on your Comfort mode, time of day, and walking distance.',
+    badgeColor: 'badge-gold',
+  },
+  explore: {
+    emoji: '🔭',
+    name: 'Explore',
+    description: 'hidden gems and cultural sites',
+    heroSubtitle: 'Curated discoveries based on your Explore mode, time of day, and walking distance.',
+    badgeColor: 'badge-plum',
+  },
+  all: {
+    emoji: '🌆',
+    name: 'All Zones',
+    description: 'all locations across all modes',
+    heroSubtitle: 'Curated urban discoveries across all modes, time of day, and walking distance.',
+    badgeColor: 'badge-gray',
+  }
+};
+
 export default function ExplorePage() {
-  const { showToast } = useApp();
+  const { showToast, user } = useApp();
   const [filterMode, setFilterMode] = useState('all');
   const [zones, setZones] = useState([]);
   const [env, setEnv] = useState({ temperature: 24, aqi_grade: 'A+', weather_code: 0 });
   const { location, startTracking } = useGeolocation();
 
   useEffect(() => {
-    getZones().then(setZones).catch(console.error);
+    // Fetch zones with optional age_group filtering
+    getZones(null, filterMode === 'all' ? null : filterMode, user?.age_group)
+      .then(setZones)
+      .catch(console.error);
     startTracking();
-  }, []);
+  }, [filterMode, user?.age_group]);
 
   useEffect(() => {
     if (location) {
@@ -35,12 +70,22 @@ export default function ExplorePage() {
     return () => clearInterval(interval);
   }, []);
 
+  // Filter zones by type and mode
   const DISCOVERIES = zones.filter(z => z.type === 'discover');
   const POPULAR = zones.filter(z => z.type === 'popular');
 
+  // Apply mode filter to displayed discoveries
   const displayedDiscoveries = filterMode === 'all' 
     ? DISCOVERIES 
     : DISCOVERIES.filter(d => d.mode === filterMode);
+
+  // Apply mode filter to popular zones as well
+  const displayedPopular = filterMode === 'all'
+    ? POPULAR
+    : POPULAR.filter(p => p.mode === filterMode);
+
+  // Get current mode config for hero section
+  const modeConfig = MODE_CONFIG[filterMode] || MODE_CONFIG.all;
 
   return (
     <div className="page active" id="page-explore" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>
@@ -86,17 +131,20 @@ export default function ExplorePage() {
       <div className="right-panel explore-right">
         <div className="explore-hero">
           <h2>What's <em>waiting</em> for you today?</h2>
-          <p>Curated urban discoveries based on your Calm mode, time of day, and walking distance from you.</p>
+          <p>{modeConfig.heroSubtitle}</p>
           <div className="explore-hero-meta">
-            <span className="badge badge-teal">🌿 Calm Day</span>
+            <span className={`badge ${modeConfig.badgeColor}`}>{modeConfig.emoji} {modeConfig.name} Day</span>
             <span className="badge badge-gold">🌤 {env.temperature}° Bengaluru</span>
-            <span className="badge badge-sky">📍 7 places nearby</span>
+            <span className="badge badge-sky">📍 {zones.length} places nearby</span>
           </div>
         </div>
 
-        <div className="section-h">Featured <em>Discoveries</em></div>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+          <div className="section-h" style={{margin: 0}}>Featured <em>Discoveries</em></div>
+          {user && <span style={{fontSize: '11px', color: 'var(--text2)', fontStyle: 'italic'}}>Recommended for you</span>}
+        </div>
         <div className="discovery-grid anim-in">
-          {displayedDiscoveries.map((d, i) => (
+          {displayedDiscoveries.length > 0 ? displayedDiscoveries.map((d, i) => (
             <div key={i} className="discovery-card" onClick={() => showToast(d.emoji, `${d.title} — navigating!`)}>
               <div className={`dc-thumb ${d.bg}`}><span style={{fontSize: '48px'}}>{d.emoji}</span></div>
               <div className="dc-body">
@@ -109,12 +157,12 @@ export default function ExplorePage() {
                 </div>
               </div>
             </div>
-          ))}
+          )) : <p style={{fontSize: '12px', color: 'var(--text2)', fontStyle: 'italic'}}>No featured discoveries in this mode yet.</p>}
         </div>
 
         <div className="section-h" style={{marginTop: '32px'}}>Popular <em>Right Now</em></div>
         <div className="discovery-grid anim-in">
-          {POPULAR.map((p, i) => (
+          {displayedPopular.length > 0 ? displayedPopular.map((p, i) => (
             <div key={'p'+i} className="discovery-card" onClick={() => showToast(p.emoji, `${p.title} — viewing!`)}>
               <div className={`dc-thumb ${p.bg}`}><span style={{fontSize: '48px'}}>{p.emoji}</span></div>
               <div className="dc-body">
@@ -127,7 +175,7 @@ export default function ExplorePage() {
                 </div>
               </div>
             </div>
-          ))}
+          )) : <p style={{fontSize: '12px', color: 'var(--text2)', fontStyle: 'italic'}}>No popular places in this mode yet. Explore featured discoveries!</p>}
         </div>
       </div>
     </div>
