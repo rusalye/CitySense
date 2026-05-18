@@ -50,6 +50,8 @@ export default function MapPage() {
 
   const [activeRoute, setActiveRoute] = useState(null);
   const destMarkerRef = useRef(null);
+  const [pendingCheckIn, setPendingCheckIn] = useState(null);
+  const [dismissedZones, setDismissedZones] = useState([]);
 
   useEffect(() => {
     startTracking();
@@ -60,16 +62,14 @@ export default function MapPage() {
     if (!location || !filteredZones) return;
     
     filteredZones.forEach(zone => {
-      if (visitedZones.includes(zone.id)) return;
+      if (visitedZones.includes(zone.id) || dismissedZones.includes(zone.id) || (pendingCheckIn && pendingCheckIn.id === zone.id)) return;
       
       const dist = calculateDistance(location.lat, location.lng, zone.lat, zone.lng);
-      if (dist < 0.05) { // 50 meters
-        setVisitedZones(prev => [...prev, zone.id]);
-        showToast('📍', `You arrived at ${zone.title}!`);
-        visitPlace(zone);
+      if (dist < 0.05 && !pendingCheckIn) { // 50 meters
+        setPendingCheckIn(zone);
       }
     });
-  }, [location, filteredZones, visitedZones, setVisitedZones, visitPlace, showToast]);
+  }, [location, filteredZones, visitedZones, dismissedZones, pendingCheckIn]);
 
   // Resizable Right Panel
   const [rightPanelWidth, setRightPanelWidth] = useState(330);
@@ -550,6 +550,30 @@ export default function MapPage() {
            })}
         </div>
       </aside>
+
+      {/* Check In Modal */}
+      {pendingCheckIn && (
+        <div className="je-modal-overlay" style={{ zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="je-modal anim-in" style={{ textAlign: 'center', padding: '30px 20px', maxWidth: '340px', background: 'var(--card)', borderRadius: '24px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '10px' }}>{pendingCheckIn.emoji}</div>
+            <h2 style={{ marginBottom: '10px', fontSize: '24px', fontFamily: 'Cormorant Garamond,serif' }}>You've Arrived!</h2>
+            <p style={{ color: 'var(--text2)', marginBottom: '24px', fontSize: '14px', lineHeight: '1.5' }}>
+              You are near <strong>{pendingCheckIn.title}</strong>. Check in to log your visit and earn rewards!
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button className="je-btn-cancel" onClick={() => {
+                setDismissedZones(prev => [...prev, pendingCheckIn.id]);
+                setPendingCheckIn(null);
+              }}>Not Now</button>
+              <button className="je-btn-submit" style={{ background: 'var(--teal)', color: '#fff', padding: '10px 20px', borderRadius: '12px', fontWeight: 'bold' }} onClick={() => {
+                setVisitedZones(prev => [...prev, pendingCheckIn.id]);
+                visitPlace(pendingCheckIn);
+                setPendingCheckIn(null);
+              }}>📍 Check In</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

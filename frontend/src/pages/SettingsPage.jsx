@@ -89,7 +89,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="page active" id="page-settings" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>
+    <div className="page active" id="page-settings">
       <aside className="left-panel anim-in">
         <div className="greeting-block">
           <div className="greeting-time-line">{timeStr}</div>

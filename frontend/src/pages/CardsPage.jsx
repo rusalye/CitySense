@@ -34,7 +34,7 @@ export default function CardsPage() {
   else if (filterMode === 'rare') data = data.filter(x => x.rarity === 'rare' || x.rarity === 'epic' || x.rarity === 'legendary');
 
   return (
-    <div className="page active" id="page-cards" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>
+    <div className="page active" id="page-cards">
       <aside className="left-panel anim-in">
         <div className="greeting-block">
           <div className="greeting-time-line">{timeStr}</div>

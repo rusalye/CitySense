@@ -733,6 +733,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
     grid-template-columns: 1fr !important;
     display: block !important;
     height: 100%;
+    min-height: 0 !important;
     overflow-y: auto;
     overflow-x: hidden;
   }
@@ -904,8 +905,27 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
   }
   
   /* Make sure map overlays don't overflow */
-  .sensory-panel {
-    display: none;
+  .sensory-panel,
+  .map-legend,
+  .map-controls {
+    display: none !important;
+  }
+
+  .map-top {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    gap: 6px;
+  }
+  
+  .map-mode-chip {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+  
+  .fchip {
+    padding: 5px 10px;
+    font-size: 10px;
   }
   
   .map-bottom {

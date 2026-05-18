@@ -29,7 +29,7 @@ export default function ChaptersPage() {
   const activeCity = citiesData.find(c => c.id === activeCityId);
 
   return (
-    <div className="page active" id="page-chapters" style={{ display: 'grid', gridTemplateColumns: '360px 1fr' }}>
+    <div className="page active" id="page-chapters">
       <aside className="left-panel anim-in">
         <div className="greeting-block">
           <div className="greeting-time-line">{timeStr}</div>
